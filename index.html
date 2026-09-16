@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0D0D0F">
+<title>Expediente Ruta 9 — ¿Podés detectar el fraude?</title>
+<style>
+  :root{
+    --negro:#0D0D0F;
+    --negro-2:#17171C;
+    --negro-3:#232329;
+    --borde:#33333C;
+    --blanco:#FFFFFF;
+    --hueso:#F2F0EC;
+    --texto:#D6D6DE;
+    --amarillo:#FFC803;
+    --amarillo-osc:#C08F00;
+    --naranja:#FF6A13;
+    --naranja-osc:#B8420A;
+    --rojo:#E01E26;
+    --rojo-osc:#961016;
+    --display:"Arial Black","Segoe UI Black","Helvetica Neue",Impact,system-ui,sans-serif;
+    --body:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    --glow-am:0 0 24px rgba(255,200,3,.45);
+    --glow-na:0 0 26px rgba(255,106,19,.5);
+    --glow-ro:0 0 26px rgba(224,30,38,.5);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(90% 55% at 50% 0%, #1E1A18 0%, transparent 65%),
+      var(--negro);
+    color:var(--texto);
+    font-family:var(--body);
+    font-weight:500;
+    font-size:16px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  button{font-family:inherit;}
+  :focus-visible{outline:3px solid var(--amarillo);outline-offset:3px;border-radius:4px;}
+  .ic{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
+
+  h1,h2,h3{font-family:var(--display);font-weight:900;color:var(--blanco);letter-spacing:-.4px;text-transform:uppercase;margin:0;}
+
+  /* ==================== CABECERA ==================== */
+  header.tramo{
+    position:fixed;top:0;left:0;right:0;z-index:70;
+    background:linear-gradient(180deg,#111115 0%, #1B1B21 100%);
+    border-bottom:2px solid var(--borde);
+    padding:8px 12px 9px;
+    padding-top:calc(8px + env(safe-area-inset-top));
+    box-shadow:0 6px 20px rgba(0,0,0,.6);
+  }
+  .tramo-fila{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px;}
+  .placa-adr{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:var(--naranja);color:#12060B;font-family:var(--display);font-weight:900;
+    font-size:.6rem;line-height:1.05;text-align:center;padding:3px 6px;
+    border:2px solid #12060B;border-radius:3px;box-shadow:var(--glow-na);
+  }
+  .exp-txt{font-family:var(--display);font-size:.66rem;color:var(--texto);letter-spacing:.5px;}
+  .tramo-izq{display:flex;align-items:center;gap:8px;}
+  .tramo-der{text-align:right;line-height:1.15;}
+  .km-actual{font-family:var(--display);font-size:.95rem;color:var(--amarillo);display:block;text-shadow:var(--glow-am);}
+  .etapa-actual{font-family:var(--display);font-size:.66rem;color:var(--blanco);letter-spacing:.4px;display:block;}
+
+  /* ruta: asfalto arriba (con camión), ticks abajo — sin superposición */
+  .ruta{display:block;}
+  .ruta-asfalto{
+    position:relative;height:22px;background:var(--negro-3);
+    border-top:1px solid #3C3C46;border-bottom:1px solid #08080A;border-radius:2px;overflow:hidden;
+  }
+  .ruta-eje{
+    position:absolute;left:0;right:0;top:10px;height:3px;
+    background:repeating-linear-gradient(90deg,var(--amarillo) 0 12px, transparent 12px 26px);
+    opacity:.55;
+  }
+  .ruta-hecho{
+    position:absolute;left:0;top:0;bottom:0;width:0;
+    background:linear-gradient(90deg,rgba(255,106,19,.15),rgba(255,200,3,.28));
+    transition:width .45s cubic-bezier(.25,.9,.3,1);
+  }
+  .camion-marca{
+    position:absolute;top:1px;left:0;width:26px;height:20px;color:var(--amarillo);
+    transition:left .45s cubic-bezier(.25,.9,.3,1);
+    filter:drop-shadow(0 0 6px rgba(255,200,3,.8));
+  }
+  .camion-marca svg{width:26px;height:20px;fill:none;stroke:currentColor;stroke-width:2;}
+  .ticks{display:flex;justify-content:space-between;gap:3px;margin-top:5px;}
+  .tick{
+    flex:1;height:6px;border-radius:3px;background:var(--negro-3);border:none;padding:0;
+    cursor:pointer;transition:background .25s ease,box-shadow .25s ease,transform .2s ease;
+  }
+  .tick.visto{background:var(--naranja);}
+  .tick.actual{background:var(--amarillo);box-shadow:var(--glow-am);transform:scaleY(1.7);}
+
+  /* ==================== ESTRUCTURA ==================== */
+  #app{padding:104px 0 96px;padding-bottom:calc(96px + env(safe-area-inset-bottom));display:flex;justify-content:center;}
+  .pantalla{display:none;width:100%;max-width:900px;padding:14px 16px 8px;}
+  .pantalla.activa{display:block;animation:entrar .35s cubic-bezier(.2,.8,.3,1);}
+  @keyframes entrar{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+
+  h2{font-size:clamp(1.75rem,8vw,2.5rem);line-height:.98;margin-bottom:10px;}
+  h2 em{font-style:normal;color:var(--amarillo);text-shadow:var(--glow-am);}
+  .bajada{font-size:1.02rem;color:var(--texto);max-width:60ch;margin:0 0 18px;font-weight:500;}
+  p{margin:0 0 12px;}
+
+  /* ==================== BOTONES ==================== */
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:10px;width:100%;
+    background:linear-gradient(135deg,var(--amarillo) 0%, var(--naranja) 100%);
+    color:#180A00;border:none;font-family:var(--display);font-weight:900;
+    font-size:1.05rem;letter-spacing:.3px;text-transform:uppercase;
+    padding:16px 22px;border-radius:12px;cursor:pointer;
+    box-shadow:0 6px 0 var(--naranja-osc), 0 10px 26px rgba(255,106,19,.35);
+    transition:transform .12s ease, box-shadow .12s ease, filter .2s ease;
+  }
+  .btn:hover{filter:brightness(1.08);transform:translateY(-2px);box-shadow:0 8px 0 var(--naranja-osc),0 14px 32px rgba(255,106,19,.45);}
+  .btn:active{transform:translateY(5px);box-shadow:0 1px 0 var(--naranja-osc),0 4px 12px rgba(255,106,19,.3);}
+  .btn .ic{width:20px;height:20px;}
+  .btn.rojo{background:linear-gradient(135deg,#FF4A3D 0%, var(--rojo) 100%);color:#fff;box-shadow:0 6px 0 var(--rojo-osc),0 10px 26px rgba(224,30,38,.35);}
+  .btn.rojo:active{box-shadow:0 1px 0 var(--rojo-osc);}
+  .btn.hueco{background:transparent;color:var(--blanco);border:2px solid var(--borde);box-shadow:none;}
+  .btn.hueco:hover{border-color:var(--amarillo);color:var(--amarillo);transform:none;box-shadow:none;filter:none;}
+  .btn.hueco:active{transform:translateY(2px);box-shadow:none;}
+  .btn.auto{width:auto;}
+  .pulso{animation:pulso 2.4s ease-in-out infinite;}
+  @keyframes pulso{0%,100%{box-shadow:0 6px 0 var(--naranja-osc),0 10px 26px rgba(255,106,19,.35);}50%{box-shadow:0 6px 0 var(--naranja-osc),0 14px 40px rgba(255,200,3,.65);}}
+
+  /* ==================== PORTADA ==================== */
+  .rotulo{
+    display:inline-flex;align-items:center;gap:8px;
+    background:var(--rojo);color:#fff;font-family:var(--display);font-weight:900;font-size:.72rem;
+    letter-spacing:.6px;text-transform:uppercase;padding:6px 12px;border-radius:5px;margin-bottom:14px;
+    box-shadow:var(--glow-ro);animation:sirena 3s ease-in-out infinite;
+  }
+  @keyframes sirena{0%,100%{box-shadow:0 0 12px rgba(224,30,38,.4);}50%{box-shadow:0 0 30px rgba(224,30,38,.9);}}
+  .titulo-hero{font-size:clamp(2.1rem,10.5vw,4rem);line-height:.95;margin-bottom:14px;}
+  .titulo-hero .amar{color:var(--amarillo);text-shadow:0 0 30px rgba(255,200,3,.55);}
+  .texto-hero{font-size:1.05rem;color:var(--texto);margin-bottom:18px;}
+  .meta-hero{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px;}
+  .meta-hero span{
+    display:flex;align-items:center;gap:6px;background:var(--negro-2);border:1.5px solid var(--borde);
+    border-radius:999px;padding:7px 14px;font-size:.82rem;font-weight:600;color:var(--blanco);
+  }
+  .meta-hero .ic{width:15px;height:15px;color:var(--amarillo);}
+  .hero-ruta{
+    border:2px solid var(--borde);border-radius:14px;overflow:hidden;background:#111114;
+    margin-bottom:22px;box-shadow:0 14px 40px rgba(0,0,0,.6);
+  }
+  .hero-ruta svg{display:block;width:100%;height:auto;}
+  .hero-dash{animation:heroRodar 1s linear infinite;}
+  @keyframes heroRodar{to{stroke-dashoffset:-46;}}
+  @media(min-width:820px){
+    .portada{display:grid;grid-template-columns:1.1fr .9fr;gap:30px;align-items:center;}
+    .hero-ruta{margin-bottom:0;}
+    .btn.auto-desktop{width:auto;}
+  }
+
+  /* ==================== FICHAS DE DATOS ==================== */
+  .datos{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:18px;}
+  @media(min-width:640px){.datos{grid-template-columns:1fr 1fr;}}
+  .dato{
+    background:linear-gradient(145deg,var(--negro-2),#121216);
+    border:1.5px solid var(--borde);border-left:5px solid var(--amarillo);
+    border-radius:10px;padding:13px 15px;display:flex;gap:12px;
+    box-shadow:0 4px 16px rgba(0,0,0,.45);
+  }
+  .dato .ic{width:26px;height:26px;color:var(--amarillo);margin-top:2px;}
+  .dato b{display:block;font-family:var(--display);font-weight:900;font-size:.72rem;color:var(--naranja);letter-spacing:.7px;text-transform:uppercase;}
+  .dato span{color:var(--blanco);font-size:.97rem;font-weight:500;}
+  .dato.grave{border-left-color:var(--rojo);background:linear-gradient(145deg,#241214,#161014);}
+  .dato.grave .ic{color:var(--rojo);}
+  .dato.grave b{color:var(--rojo);}
+
+  /* ==================== PAPEL ==================== */
+  .papel{
+    background:var(--blanco);color:#0E0E10;border-radius:4px 16px 16px 16px;
+    padding:20px 20px;margin:16px 0;border-top:6px solid var(--naranja);
+    box-shadow:0 14px 34px rgba(0,0,0,.55);
+  }
+  .papel h3{font-size:1.15rem;color:#0E0E10;margin-bottom:10px;}
+  .papel p{color:#3A3A42;font-weight:500;}
+  .papel p:last-child{margin-bottom:0;}
+  .papel p b{color:#0E0E10;font-weight:800;}
+  .papel .cita{border-left:5px solid var(--rojo);padding:4px 0 4px 14px;color:#0E0E10;font-size:1rem;font-weight:600;}
+  .papel ul{margin:0;padding-left:18px;color:#3A3A42;}
+  .papel ul li{margin-bottom:8px;font-weight:500;}
+  .papel ul li b{color:#0E0E10;font-weight:800;}
+
+  /* ==================== SIMULACIÓN ==================== */
+  .sim-caja{display:grid;grid-template-columns:1fr;gap:16px;}
+  @media(min-width:760px){.sim-caja{grid-template-columns:290px 1fr;align-items:start;}}
+  .sim-marco{
+    background:#0A0A0C;border:2px solid var(--borde);border-radius:14px;padding:8px;
+    max-width:300px;margin:0 auto;width:100%;box-shadow:0 14px 40px rgba(0,0,0,.6);
+  }
+  .sim-marco svg{display:block;width:100%;height:auto;border-radius:8px;}
+  .beats{list-style:none;margin:0 0 14px;padding:0;}
+  .beat{
+    display:flex;gap:12px;padding:12px 13px;border-radius:10px;margin-bottom:8px;
+    background:var(--negro-2);border:1.5px solid var(--borde);border-left:5px solid var(--borde);
+    opacity:.45;transition:all .3s ease;
+  }
+  .beat.on{opacity:1;border-left-color:var(--amarillo);background:var(--negro-3);box-shadow:0 0 22px rgba(255,200,3,.22);transform:translateX(4px);}
+  .beat.impacto.on{border-left-color:var(--rojo);box-shadow:0 0 26px rgba(224,30,38,.35);}
+  .beat .n{font-family:var(--display);font-weight:900;font-size:1.35rem;color:var(--naranja);flex:none;width:20px;line-height:1.1;}
+  .beat.impacto .n{color:var(--rojo);}
+  .beat p{margin:0;font-size:.95rem;color:var(--blanco);font-weight:700;}
+  .beat p small{display:block;color:var(--texto);font-size:.86rem;margin-top:3px;font-weight:500;line-height:1.45;}
+
+  .veh{transform-box:fill-box;transform-origin:center;}
+  .sim .eje-anim{stroke-dashoffset:0;}
+  .sim.corre .eje-anim{animation:rodar .85s linear infinite;}
+  .sim.corre #auto{animation:autoChoca 5.2s cubic-bezier(.4,0,.6,1) forwards;}
+  .sim.corre #camion{animation:camionChoca 5.2s cubic-bezier(.35,0,.7,1) forwards;}
+  .sim.corre #flash{animation:destello 5.2s linear forwards;}
+  .sim.corre #frenada{animation:frenar 5.2s linear forwards;}
+  .sim.fin #auto{transform:translate(158px,240px) rotate(215deg);}
+  .sim.fin #camion{transform:translate(30px,-240px) rotate(26deg);}
+  .sim.fin #frenada{stroke-dashoffset:0;opacity:.6;}
+  @keyframes rodar{to{stroke-dashoffset:-48;}}
+  @keyframes autoChoca{
+    0%   {transform:translate(0,-95px) rotate(0deg);}
+    15%  {transform:translate(-30px,10px) rotate(-7deg);}
+    26%  {transform:translate(-4px,55px) rotate(9deg);}
+    36%  {transform:translate(18px,95px) rotate(13deg);}
+    45%  {transform:translate(58px,130px) rotate(20deg);}
+    52%  {transform:translate(85px,160px) rotate(26deg);}
+    58%  {transform:translate(120px,185px) rotate(92deg);}
+    76%  {transform:translate(150px,225px) rotate(200deg);}
+    100% {transform:translate(158px,240px) rotate(215deg);}
+  }
+  @keyframes camionChoca{
+    0%   {transform:translate(0,0) rotate(0deg);}
+    52%  {transform:translate(0,-185px) rotate(0deg);}
+    58%  {transform:translate(5px,-201px) rotate(5deg);}
+    74%  {transform:translate(19px,-226px) rotate(17deg);}
+    100% {transform:translate(30px,-240px) rotate(26deg);}
+  }
+  @keyframes destello{
+    0%,50%{opacity:0;transform:scale(.2);}
+    54%{opacity:1;transform:scale(1);}
+    68%{opacity:0;transform:scale(2);}
+    100%{opacity:0;transform:scale(2);}
+  }
+  @keyframes frenar{
+    0%,40%{stroke-dashoffset:120;opacity:0;}
+    44%{opacity:.8;}
+    56%{stroke-dashoffset:0;opacity:.8;}
+    100%{stroke-dashoffset:0;opacity:.6;}
+  }
+  #flash{transform-box:fill-box;transform-origin:center;opacity:0;}
+  #frenada{stroke-dasharray:120;stroke-dashoffset:120;opacity:0;}
+  .sim.corre{animation:sacudir 5.2s linear;}
+  @keyframes sacudir{0%,51%{transform:none;}53%{transform:translate(-4px,3px);}55%{transform:translate(4px,-3px);}57%{transform:translate(-3px,-2px);}60%,100%{transform:none;}}
+
+  /* ==================== TARJETAS ==================== */
+  .rejilla{display:grid;grid-template-columns:1fr;gap:12px;perspective:1400px;}
+  @media(min-width:560px){.rejilla{grid-template-columns:1fr 1fr;}}
+  @media(min-width:860px){.rejilla{grid-template-columns:1fr 1fr 1fr;}}
+  .voltea{
+    position:relative;min-height:176px;cursor:pointer;transform-style:preserve-3d;
+    transition:transform .6s cubic-bezier(.2,.85,.25,1);border:none;padding:0;background:none;
+    text-align:left;font-family:inherit;width:100%;
+  }
+  .voltea.girada{transform:rotateY(180deg);}
+  .cara{position:absolute;inset:0;backface-visibility:hidden;border-radius:14px;padding:16px;display:flex;flex-direction:column;}
+  .frente{
+    background:linear-gradient(150deg,var(--negro-2),#121216);border:2px solid var(--borde);
+    color:var(--blanco);align-items:center;justify-content:center;text-align:center;gap:10px;
+    box-shadow:0 6px 20px rgba(0,0,0,.5);transition:border-color .2s ease,box-shadow .2s ease;
+  }
+  .frente .ic{width:38px;height:38px;color:var(--naranja);filter:drop-shadow(0 0 10px rgba(255,106,19,.55));}
+  .frente .rot{font-family:var(--display);font-weight:900;font-size:1.05rem;text-transform:uppercase;letter-spacing:.3px;}
+  .frente .pista{font-family:var(--display);font-size:.62rem;color:var(--amarillo);letter-spacing:1px;text-transform:uppercase;}
+  .voltea:hover .frente{border-color:var(--amarillo);box-shadow:0 8px 28px rgba(255,200,3,.28);}
+  .dorso{
+    background:var(--blanco);color:#3A3A42;transform:rotateY(180deg);font-size:.9rem;font-weight:500;
+    line-height:1.5;justify-content:center;overflow-y:auto;border-top:6px solid var(--amarillo);
+    box-shadow:0 6px 20px rgba(0,0,0,.5);
+  }
+  .dorso b{font-family:var(--display);font-weight:900;font-size:1rem;color:#0E0E10;display:block;margin-bottom:6px;text-transform:uppercase;}
+  .glos{min-height:150px;}
+  .glos .frente .rot{font-size:1.2rem;color:var(--amarillo);text-shadow:0 0 18px rgba(255,200,3,.4);}
+
+  /* ==================== JUEGO ==================== */
+  .marcador{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+  .marcador-barra{flex:1;height:12px;background:var(--negro-3);border-radius:8px;overflow:hidden;border:1.5px solid var(--borde);}
+  .marcador-relleno{height:100%;width:0;border-radius:8px;background:linear-gradient(90deg,var(--naranja),var(--amarillo));box-shadow:0 0 16px rgba(255,200,3,.6);transition:width .4s cubic-bezier(.25,.9,.3,1);}
+  .marcador-txt{font-family:var(--display);font-size:.8rem;color:var(--amarillo);white-space:nowrap;}
+  .sospecha{
+    position:relative;background:var(--blanco);color:#0E0E10;border-radius:4px 18px 18px 18px;
+    padding:20px 18px;border-top:7px solid var(--rojo);box-shadow:0 16px 40px rgba(0,0,0,.6);
+    animation:entrar .35s cubic-bezier(.2,.8,.3,1);
+  }
+  .sospecha.acertada{animation:festejo .5s ease;}
+  .sospecha.fallada{animation:temblar .4s ease;}
+  @keyframes festejo{0%{transform:scale(1);}35%{transform:scale(1.02);box-shadow:0 0 50px rgba(255,200,3,.65);}100%{transform:scale(1);}}
+  @keyframes temblar{0%,100%{transform:translateX(0);}20%{transform:translateX(-9px);}40%{transform:translateX(8px);}60%{transform:translateX(-5px);}80%{transform:translateX(3px);}}
+  .sos-cabeza{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;}
+  .sos-cabeza .ic{width:30px;height:30px;color:var(--rojo);margin-top:3px;}
+  .sos-cabeza h3{font-size:1.3rem;color:#0E0E10;line-height:1.05;margin-bottom:3px;}
+  .sos-cabeza .def{font-size:.9rem;color:#5A5A64;font-weight:500;}
+  .sos-preg{font-size:1.04rem;margin-bottom:14px;color:#0E0E10;font-weight:700;}
+  .opciones{display:flex;flex-direction:column;gap:10px;}
+  .op{
+    text-align:left;background:#F4F3F0;border:2px solid #DDDCD8;color:#1A1A20;
+    padding:14px 15px;border-radius:12px;cursor:pointer;font-size:.93rem;line-height:1.5;font-weight:500;
+    display:flex;gap:12px;align-items:flex-start;
+    transition:border-color .15s ease,background .15s ease,transform .12s ease,box-shadow .15s ease;
+  }
+  .op .letra{
+    font-family:var(--display);font-weight:900;color:#fff;background:var(--negro-3);
+    flex:none;width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.85rem;
+  }
+  .op:hover:not(:disabled){border-color:var(--naranja);background:#FFF6EE;transform:translateX(4px);box-shadow:0 6px 18px rgba(255,106,19,.22);}
+  .op:disabled{cursor:default;opacity:.45;}
+  .op.buena{background:#FFF4D6;border-color:var(--amarillo);opacity:1;box-shadow:0 0 26px rgba(255,200,3,.45);}
+  .op.buena .letra{background:var(--amarillo);color:#180A00;}
+  .op.mala{background:#FCE5E5;border-color:var(--rojo);opacity:1;}
+  .op.mala .letra{background:var(--rojo);color:#fff;}
+  .fallo{margin-top:16px;padding:15px 16px;border-radius:12px;display:none;font-size:.94rem;font-weight:500;line-height:1.55;}
+  .fallo.vista{display:block;animation:entrar .3s ease;}
+  .fallo.acierto{background:#FFF7E0;border:2px solid var(--amarillo);color:#4A3600;}
+  .fallo.error{background:#FDECEC;border:2px solid var(--rojo);color:#5C1015;}
+  .fallo b{font-family:var(--display);font-weight:900;display:block;font-size:1.05rem;margin-bottom:5px;text-transform:uppercase;}
+  .fallo.acierto b{color:#B88400;}
+  .fallo.error b{color:var(--rojo-osc);}
+  .fallo .accion{margin-top:14px;}
+  .chispa{position:absolute;width:9px;height:9px;border-radius:2px;left:50%;top:14px;pointer-events:none;animation:volar .9s cubic-bezier(.2,.7,.4,1) forwards;}
+  @keyframes volar{0%{opacity:1;transform:translate(0,0) rotate(0deg) scale(1);}100%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--rot)) scale(.3);}}
+
+  /* ==================== VEREDICTO ==================== */
+  .sello-zona{text-align:center;padding:10px 0 4px;}
+  .sello{
+    display:inline-block;border:6px solid var(--rojo);color:var(--rojo);
+    font-family:var(--display);font-weight:900;font-size:clamp(1.9rem,9vw,3rem);letter-spacing:1px;
+    padding:10px 24px;border-radius:10px;transform:rotate(-6deg);text-transform:uppercase;
+    text-shadow:0 0 24px rgba(224,30,38,.5);box-shadow:0 0 40px rgba(224,30,38,.35), inset 0 0 26px rgba(224,30,38,.15);
+  }
+  .pantalla.activa .sello{animation:sellar .6s cubic-bezier(.2,.9,.25,1.5);}
+  @keyframes sellar{0%{opacity:0;transform:rotate(-6deg) scale(2.4);}55%{opacity:1;}100%{opacity:1;transform:rotate(-6deg) scale(1);}}
+  .puntaje{font-family:var(--display);font-weight:900;font-size:clamp(1.3rem,6vw,1.8rem);color:var(--blanco);margin:20px 0 4px;text-transform:uppercase;}
+  .puntaje span{color:var(--amarillo);font-size:1.35em;text-shadow:var(--glow-am);}
+  .rango{
+    display:inline-block;background:linear-gradient(135deg,var(--amarillo),var(--naranja));color:#180A00;
+    font-family:var(--display);font-weight:900;font-size:.95rem;letter-spacing:.6px;text-transform:uppercase;
+    padding:9px 20px;border-radius:999px;margin:6px 0 10px;box-shadow:0 8px 24px rgba(255,106,19,.45);
+  }
+  .msj{color:var(--texto);font-size:.96rem;max-width:52ch;margin:0 auto;font-weight:500;}
+
+  /* ==================== CHECKLIST ==================== */
+  .chk{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr;gap:7px;}
+  @media(min-width:620px){.chk{grid-template-columns:1fr 1fr;}}
+  .chk li{display:flex;gap:9px;align-items:flex-start;font-size:.92rem;color:#3A3A42;font-weight:500;}
+  .chk .ic{width:18px;height:18px;color:var(--naranja);margin-top:3px;stroke-width:3;}
+
+  /* ==================== CIERRE ==================== */
+  .creditos{text-align:center;}
+  .campo{
+    background:var(--negro-2);border:2px dashed var(--borde);border-radius:12px;
+    padding:16px;margin:20px auto;max-width:420px;font-size:.92rem;color:var(--texto);font-weight:600;
+  }
+  .campo strong{color:var(--amarillo);font-family:var(--display);}
+
+  /* ==================== NAVEGACIÓN ==================== */
+  footer.nav{
+    position:fixed;bottom:0;left:0;right:0;z-index:70;
+    background:linear-gradient(180deg,#1B1B21 0%,#111115 100%);
+    border-top:2px solid var(--borde);display:flex;align-items:center;gap:10px;
+    padding:10px 14px;padding-bottom:calc(10px + env(safe-area-inset-bottom));
+    box-shadow:0 -6px 22px rgba(0,0,0,.6);
+  }
+  .nav-btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:7px;
+    background:linear-gradient(135deg,var(--amarillo),var(--naranja));color:#180A00;border:none;
+    font-family:var(--display);font-weight:900;font-size:.95rem;letter-spacing:.3px;text-transform:uppercase;
+    padding:13px 20px;border-radius:11px;cursor:pointer;flex:1;
+    box-shadow:0 5px 0 var(--naranja-osc);transition:transform .1s ease;
+  }
+  .nav-btn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--naranja-osc);}
+  .nav-btn .ic{width:18px;height:18px;}
+  .nav-btn.atras{background:transparent;color:var(--blanco);border:2px solid var(--borde);box-shadow:none;flex:0 0 auto;padding:13px 16px;}
+  .nav-btn.atras:active{transform:translateY(2px);}
+  .nav-btn:disabled{opacity:.25;cursor:default;}
+
+  /* ==================== CRONÓMETRO ==================== */
+  .crono{
+    display:none;align-items:center;gap:5px;background:var(--negro-3);border:2px solid var(--rojo);
+    border-radius:8px;padding:3px 9px;font-family:var(--display);font-weight:900;font-size:.85rem;
+    color:var(--rojo);box-shadow:0 0 14px rgba(224,30,38,.4);
+  }
+  .crono.on{display:inline-flex;}
+  .crono .ic{width:14px;height:14px;stroke-width:3;}
+
+  /* ==================== ALIAS ==================== */
+  .alias-caja{
+    background:linear-gradient(150deg,var(--negro-2),#121216);border:2px solid var(--borde);
+    border-left:6px solid var(--amarillo);border-radius:14px;padding:16px;margin:18px 0;
+    box-shadow:0 8px 26px rgba(0,0,0,.5);
+  }
+  .alias-caja label{
+    display:block;font-family:var(--display);font-weight:900;font-size:.85rem;color:var(--amarillo);
+    text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;
+  }
+  .alias-caja input{
+    width:100%;background:var(--negro);border:2px solid var(--borde);border-radius:10px;
+    padding:14px 14px;color:var(--blanco);font-family:var(--display);font-weight:900;font-size:1.1rem;
+    text-transform:uppercase;letter-spacing:.5px;
+  }
+  .alias-caja input::placeholder{color:#5A5A64;letter-spacing:0;}
+  .alias-caja input:focus{border-color:var(--amarillo);outline:none;box-shadow:0 0 22px rgba(255,200,3,.35);}
+  .alias-caja .nota{font-size:.82rem;color:var(--texto);margin:8px 0 0;font-weight:500;}
+
+  /* ==================== PUNTAJE ==================== */
+  .puntos-grandes{
+    font-family:var(--display);font-weight:900;font-size:clamp(3.2rem,18vw,5.5rem);line-height:.9;
+    color:var(--amarillo);text-shadow:0 0 40px rgba(255,200,3,.65);margin:6px 0 0;
+  }
+  .puntos-label{font-family:var(--display);font-weight:900;font-size:.8rem;color:var(--texto);letter-spacing:2px;text-transform:uppercase;}
+  .desglose{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:16px 0 4px;}
+  .desglose div{
+    background:var(--negro-2);border:2px solid var(--borde);border-radius:12px;padding:10px 16px;min-width:104px;
+  }
+  .desglose b{display:block;font-family:var(--display);font-weight:900;font-size:1.5rem;color:var(--blanco);line-height:1.1;}
+  .desglose span{font-size:.72rem;color:var(--texto);font-weight:700;text-transform:uppercase;letter-spacing:.8px;}
+  .desglose .bonus b{color:var(--naranja);}
+
+  /* ==================== RANKING ==================== */
+  .rank-caja{margin-top:22px;}
+  .rank-titulo{
+    display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:900;
+    font-size:1.25rem;color:var(--blanco);text-transform:uppercase;margin-bottom:4px;
+  }
+  .rank-titulo .ic{width:24px;height:24px;color:var(--amarillo);}
+  .rank-sub{font-size:.85rem;color:var(--texto);margin-bottom:12px;font-weight:500;}
+  .rank-lista{display:flex;flex-direction:column;gap:7px;}
+  .rank-fila{
+    display:flex;align-items:center;gap:12px;background:var(--negro-2);border:2px solid var(--borde);
+    border-radius:12px;padding:11px 13px;
+  }
+  .rank-fila .pos{
+    font-family:var(--display);font-weight:900;font-size:1rem;width:32px;height:32px;flex:none;
+    display:flex;align-items:center;justify-content:center;border-radius:9px;
+    background:var(--negro-3);color:var(--texto);
+  }
+  .rank-fila:nth-child(1) .pos{background:linear-gradient(135deg,var(--amarillo),var(--naranja));color:#180A00;box-shadow:0 0 18px rgba(255,200,3,.55);}
+  .rank-fila:nth-child(2) .pos{background:#C9C9D2;color:#180A00;}
+  .rank-fila:nth-child(3) .pos{background:var(--naranja);color:#180A00;}
+  .rank-fila .quien{flex:1;min-width:0;}
+  .rank-fila .quien b{
+    display:block;font-family:var(--display);font-weight:900;font-size:1rem;color:var(--blanco);
+    text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .rank-fila .quien span{font-size:.75rem;color:var(--texto);font-weight:600;}
+  .rank-fila .pts{font-family:var(--display);font-weight:900;font-size:1.25rem;color:var(--amarillo);flex:none;}
+  .rank-fila.yo{border-color:var(--amarillo);background:#241E08;box-shadow:0 0 26px rgba(255,200,3,.28);}
+  .rank-vacio{color:var(--texto);font-size:.9rem;font-weight:500;text-align:center;padding:18px;border:2px dashed var(--borde);border-radius:12px;}
+  .codigo-val{
+    margin-top:14px;text-align:center;font-family:var(--display);font-weight:900;font-size:1.05rem;
+    letter-spacing:2px;color:var(--naranja);background:var(--negro-2);border:2px dashed var(--naranja);
+    border-radius:10px;padding:11px;
+  }
+  .codigo-val small{display:block;font-family:var(--body);font-size:.72rem;letter-spacing:0;color:var(--texto);font-weight:600;text-transform:none;margin-top:3px;}
+
+  /* ==================== MODAL ==================== */
+  .modal-fondo{
+    position:fixed;inset:0;z-index:90;background:rgba(5,5,7,.82);backdrop-filter:blur(3px);
+    display:none;align-items:center;justify-content:center;padding:22px;
+  }
+  .modal-fondo.on{display:flex;animation:fundir .2s ease;}
+  @keyframes fundir{from{opacity:0;}to{opacity:1;}}
+  .modal{
+    background:var(--blanco);color:#0E0E10;border-radius:6px 20px 20px 20px;
+    border-top:8px solid var(--rojo);padding:24px 22px;max-width:420px;width:100%;
+    box-shadow:0 24px 60px rgba(0,0,0,.7);animation:saltar .35s cubic-bezier(.2,.9,.25,1.4);
+  }
+  @keyframes saltar{from{opacity:0;transform:scale(.85) translateY(20px);}to{opacity:1;transform:none;}}
+  .modal .ic-alerta{width:46px;height:46px;color:var(--rojo);stroke-width:2;margin-bottom:10px;}
+  .modal h3{font-size:1.35rem;color:#0E0E10;line-height:1.05;margin-bottom:10px;}
+  .modal p{color:#3A3A42;font-weight:500;margin-bottom:18px;}
+  .modal p b{color:#0E0E10;font-weight:800;}
+  .modal-botones{display:flex;flex-direction:column;gap:9px;}
+  .modal-botones .btn{font-size:.98rem;}
+  /* el botón hueco está pensado para fondo negro; dentro del modal blanco se invierte */
+  .modal-botones .btn.hueco{
+    background:#F4F3F0;color:#0E0E10;border:2px solid #0E0E10;
+  }
+  .modal-botones .btn.hueco:hover{
+    background:var(--rojo);border-color:var(--rojo);color:#fff;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;}
+  }
+</style>
+</head>
+<body>
+
+<svg style="display:none" aria-hidden="true">
+  <symbol id="i-camion" viewBox="0 0 24 24"><path d="M2 7h10v9H2z"/><path d="M12 10h4l3 3v3h-7z"/><circle cx="6" cy="18" r="1.8"/><circle cx="16" cy="18" r="1.8"/><path d="M2 16h1.5M9 16h5"/></symbol>
+  <symbol id="i-auto" viewBox="0 0 24 24"><path d="M3 15v-2.2l2-4A2 2 0 0 1 6.9 7.5h10.2a2 2 0 0 1 1.9 1.3l2 4V15"/><path d="M3 15h18v2.5h-2.5"/><circle cx="7" cy="17" r="1.7"/><circle cx="17" cy="17" r="1.7"/><path d="M5.2 12.3h13.6"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s6.5-6.1 6.5-11A6.5 6.5 0 0 0 5.5 10c0 4.9 6.5 11 6.5 11z"/><circle cx="12" cy="10" r="2.4"/></symbol>
+  <symbol id="i-calendario" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol>
+  <symbol id="i-lluvia" viewBox="0 0 24 24"><path d="M7 15.5a4 4 0 0 1 .4-8 5.2 5.2 0 0 1 9.9 1.3A3.6 3.6 0 0 1 17 15.5z"/><path d="M8.5 18.5l-1 2.3M12.5 18.5l-1 2.3M16.5 18.5l-1 2.3"/></symbol>
+  <symbol id="i-alerta" viewBox="0 0 24 24"><path d="M12 3.6 21.2 19.4H2.8z"/><path d="M12 9.6v4.2M12 16.8v.1"/></symbol>
+  <symbol id="i-gota" viewBox="0 0 24 24"><path d="M12 3.2s6 6.6 6 10.6a6 6 0 0 1-12 0c0-4 6-10.6 6-10.6z"/><path d="M9.2 14.2a2.8 2.8 0 0 0 2.2 2.6"/></symbol>
+  <symbol id="i-ruta" viewBox="0 0 24 24"><path d="M9 3 5 21M15 3l4 18"/><path d="M12 4v3M12 10.5v3M12 17v3"/></symbol>
+  <symbol id="i-lupa" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.5"/><path d="M15.6 15.6 21 21"/></symbol>
+  <symbol id="i-repetir" viewBox="0 0 24 24"><path d="M20.5 12a8.5 8.5 0 1 1-2.6-6.1"/><path d="M20.8 4v5h-5"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.6 19 12 7 19.4z"/></symbol>
+  <symbol id="i-tilde" viewBox="0 0 24 24"><path d="M4.5 12.8 9.6 18 19.5 6.5"/></symbol>
+  <symbol id="i-flecha" viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-flecha-izq" viewBox="0 0 24 24"><path d="M20 12H5M11 6l-6 6 6 6"/></symbol>
+  <symbol id="i-carpeta" viewBox="0 0 24 24"><path d="M3 6.5A1.5 1.5 0 0 1 4.5 5h4.2l1.8 2.4h9A1.5 1.5 0 0 1 21 8.9V18a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18z"/></symbol>
+  <symbol id="i-reloj" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6"/><path d="M12 7v5.2l3.3 2"/></symbol>
+  <symbol id="i-escudo" viewBox="0 0 24 24"><path d="M12 3 4.8 6v6c0 4.3 3 7.7 7.2 9 4.2-1.3 7.2-4.7 7.2-9V6z"/><path d="M9.2 12.2 11.3 14.3 15 10.4"/></symbol>
+  <symbol id="i-frasco" viewBox="0 0 24 24"><path d="M10 3h4M11 3v6.2L6.4 17.8A2 2 0 0 0 8.2 21h7.6a2 2 0 0 0 1.8-3.2L13 9.2V3"/><path d="M8.4 15h7.2"/></symbol>
+  <symbol id="i-volcado" viewBox="0 0 24 24"><path d="M3.5 18.5h17"/><path d="M5 18.5 7.8 8.3l9.7 2.6-2.7 7.6z"/><circle cx="9.3" cy="6.5" r="1.6"/><path d="M14.6 10.2 16 5"/></symbol>
+</svg>
+
+<header class="tramo">
+  <div class="tramo-fila">
+    <div class="tramo-izq">
+      <span class="placa-adr">30<br>1202</span>
+      <span class="exp-txt">EXP.<br>R9/856</span>
+      <span class="crono" id="crono"><svg class="ic"><use href="#i-reloj"/></svg><span id="cronoTxt">0:00</span></span>
+    </div>
+    <div class="tramo-der">
+      <span class="km-actual" id="kmTxt">km 848</span>
+      <span class="etapa-actual" id="etapaTxt">Portada</span>
+    </div>
+  </div>
+  <div class="ruta">
+    <div class="ruta-asfalto">
+      <div class="ruta-hecho" id="rutaHecho"></div>
+      <div class="ruta-eje"></div>
+      <div class="camion-marca" id="camionMarca"><svg viewBox="0 0 24 24"><use href="#i-camion"/></svg></div>
+    </div>
+    <div class="ticks" id="ticks"></div>
+  </div>
+</header>
+
+<div id="app">
+
+  <!-- ========== 0 · PORTADA ========== -->
+  <section class="pantalla activa" id="p0">
+    <div class="portada">
+      <div>
+        <span class="rotulo"><svg class="ic" style="width:14px;height:14px"><use href="#i-carpeta"/></svg> Caso abierto · Ruta 9, km 856</span>
+        <h1 class="titulo-hero">Chocaron de frente.<br><span class="amar">¿Pasó como lo cuentan?</span></h1>
+        <p class="texto-hero">Un camión cisterna con 35.935 litros de combustible y un auto que venía en sentido contrario. Un muerto. Y una aseguradora que, antes de pagar, necesita saber si la historia se sostiene. Ese trabajo lo hace un investigador de siniestros: hoy sos vos.</p>
+        <div class="meta-hero">
+          <span><svg class="ic"><use href="#i-reloj"/></svg> 5 minutos</span>
+          <span><svg class="ic"><use href="#i-repetir"/></svg> Las pistas cambian</span>
+          <span><svg class="ic"><use href="#i-escudo"/></svg> Caso real</span>
+        </div>
+      </div>
+      <div class="hero-ruta">
+        <svg viewBox="0 0 220 210" aria-label="Camión circulando por la ruta, visto desde arriba">
+          <rect width="220" height="210" fill="#1A1A1E"/>
+          <rect x="26" y="0" width="168" height="210" fill="#2A241C"/>
+          <rect x="44" y="0" width="132" height="210" fill="#1F1F24"/>
+          <rect x="47" y="0" width="3" height="210" fill="#FFFFFF" opacity=".6"/>
+          <rect x="170" y="0" width="3" height="210" fill="#FFFFFF" opacity=".6"/>
+          <line x1="106" y1="-20" x2="106" y2="230" stroke="#FFC803" stroke-width="3"/>
+          <line class="hero-dash" x1="115" y1="-20" x2="115" y2="230" stroke="#FFFFFF" stroke-width="3" stroke-dasharray="24 22" opacity=".8"/>
+          <g transform="translate(142,112)">
+            <rect x="-15" y="-52" width="30" height="62" rx="3" fill="#E8E8EC" stroke="#8A8A94" stroke-width="1.5"/>
+            <rect x="-13" y="-46" width="26" height="8" rx="2" fill="#FF6A13" opacity=".9"/>
+            <rect x="-13" y="-30" width="26" height="6" rx="2" fill="#E01E26" opacity=".9"/>
+            <rect x="-15" y="12" width="30" height="46" rx="4" fill="#FFFFFF" stroke="#8A8A94" stroke-width="1.5"/>
+            <rect x="-9" y="20" width="18" height="7" rx="1.5" fill="#FF6A13"/>
+            <rect x="-11" y="34" width="22" height="16" rx="2" fill="#1F1F24" opacity=".35"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+    <div class="alias-caja">
+      <label for="alias">Tu nombre de investigador</label>
+      <input id="alias" maxlength="14" placeholder="Ingresá tu nombre" autocomplete="off">
+      <p class="nota">Se usa para el ranking del día. Podés dejarlo vacío y jugar igual.</p>
+    </div>
+    <button class="btn pulso auto-desktop" onclick="empezar()">Abrir el expediente <svg class="ic"><use href="#i-flecha"/></svg></button>
+  </section>
+
+  <!-- ========== 1 · EL CASO ========== -->
+  <section class="pantalla" id="p1">
+    <h2>Lo que se sabe <em>con certeza</em></h2>
+    <p class="bajada">Antes de sospechar de nadie hay que fijar los hechos. Esto es lo que quedó asentado por la policía, el hospital y la inspección del vehículo.</p>
+    <div class="datos">
+      <div class="dato"><svg class="ic"><use href="#i-calendario"/></svg><div><b>Cuándo</b><span>5 de mayo de 2023, durante la mañana</span></div></div>
+      <div class="dato"><svg class="ic"><use href="#i-pin"/></svg><div><b>Dónde</b><span>Ruta Nacional 9, km 856, entre Santa Elena y Rayo Cortado (Córdoba)</span></div></div>
+      <div class="dato"><svg class="ic"><use href="#i-camion"/></svg><div><b>Vehículo asegurado</b><span>Camión tractor con semirremolque cisterna, sentido sur → norte</span></div></div>
+      <div class="dato"><svg class="ic"><use href="#i-auto"/></svg><div><b>El otro vehículo</b><span>Un automóvil que circulaba en sentido norte → sur</span></div></div>
+      <div class="dato"><svg class="ic"><use href="#i-gota"/></svg><div><b>La carga</b><span>35.935 litros de gasoil. Se derramaron 4.935: el resto quedó contenido</span></div></div>
+      <div class="dato grave"><svg class="ic"><use href="#i-alerta"/></svg><div><b>Consecuencias</b><span>El camionero sufrió raspones en un codo. El conductor del automóvil falleció</span></div></div>
+    </div>
+    <div class="papel">
+      <h3>La versión del camionero</h3>
+      <p class="cita">Venía por la Ruta 9 con llovizna y el limpiaparabrisas puesto. A poca distancia vio que el auto de enfrente bajaba bruscamente a su banquina, retomaba el asfalto y se cruzaba a la banquina contraria. En el intento de volver a su carril perdió el control y quedó delante del camión. Frenó, pero la distancia era demasiado corta.</p>
+      <p>El camionero tiene 50 años, es chofer de empresa y trabaja en turnos de 24 días con 6 de descanso, 12 horas diarias. Declaró bajo juramento no haber consumido alcohol ni otra sustancia en las 12 horas previas, y en el hospital le hicieron una extracción de sangre para análisis.</p>
+    </div>
+  </section>
+
+  <!-- ========== 2 · RECONSTRUCCIÓN ========== -->
+  <section class="pantalla" id="p2">
+    <h2>Reconstrucción del <em>impacto</em></h2>
+    <p class="bajada">Esto se desprende de las huellas en la banquina, de la posición final de los dos vehículos y del sector del camión que quedó golpeado.</p>
+    <div class="sim-caja">
+      <div class="sim-marco">
+        <svg class="sim" id="sim" viewBox="0 0 320 520" aria-label="Reconstrucción del choque vista desde arriba">
+          <rect width="320" height="520" fill="#1A1A1E"/>
+          <rect x="40" y="0" width="240" height="520" fill="#2A241C"/>
+          <rect x="68" y="0" width="184" height="520" fill="#1F1F24"/>
+          <rect x="71" y="0" width="3" height="520" fill="#FFFFFF" opacity=".55"/>
+          <rect x="246" y="0" width="3" height="520" fill="#FFFFFF" opacity=".55"/>
+          <line x1="155" y1="0" x2="155" y2="520" stroke="#FFC803" stroke-width="3.5"/>
+          <line class="eje-anim" x1="165" y1="0" x2="165" y2="520" stroke="#FFFFFF" stroke-width="3.5" stroke-dasharray="26 22" opacity=".75"/>
+
+          <path id="frenada" d="M198 300 L200 218 M214 300 L216 218" stroke="#0A0A0C" stroke-width="6" stroke-linecap="round" fill="none" opacity="0"/>
+
+          <g id="auto" class="veh">
+            <rect x="100" y="20" width="28" height="48" rx="5" fill="#E01E26" stroke="#7A0A10" stroke-width="1.5"/>
+            <rect x="103" y="26" width="22" height="9" rx="2" fill="#1A1A1E" opacity=".6"/>
+            <rect x="103" y="50" width="22" height="9" rx="2" fill="#1A1A1E" opacity=".45"/>
+            <rect x="101" y="62" width="26" height="5" rx="2" fill="#FFC803"/>
+          </g>
+
+          <g id="camion" class="veh">
+            <rect x="191" y="440" width="30" height="58" rx="4" fill="#E8E8EC" stroke="#8A8A94" stroke-width="1.5"/>
+            <rect x="193" y="446" width="26" height="8" rx="2" fill="#FF6A13" opacity=".9"/>
+            <rect x="193" y="462" width="26" height="6" rx="2" fill="#E01E26" opacity=".85"/>
+            <rect x="191" y="406" width="30" height="34" rx="4" fill="#FFFFFF" stroke="#8A8A94" stroke-width="1.5"/>
+            <rect x="197" y="412" width="18" height="7" rx="1.5" fill="#FF6A13"/>
+            <rect x="194" y="424" width="24" height="12" rx="2" fill="#1F1F24" opacity=".3"/>
+          </g>
+
+          <g id="flash">
+            <circle cx="200" cy="222" r="30" fill="#E01E26" opacity=".45"/>
+            <circle cx="200" cy="222" r="20" fill="#FF6A13" opacity=".8"/>
+            <circle cx="200" cy="222" r="10" fill="#FFF6D8"/>
+          </g>
+        </svg>
+      </div>
+      <div>
+        <ol class="beats" id="beats">
+          <li class="beat" data-t="0"><span class="n">1</span><p>El camión sube por su carril<small>Sentido Santa Elena → Rayo Cortado. Llovizna, asfalto mojado, un carril por mano.</small></p></li>
+          <li class="beat" data-t="900"><span class="n">2</span><p>El auto se va a la banquina y corrige de más<small>Baja bruscamente a la banquina de tierra, retoma el asfalto y se pasa a la banquina contraria.</small></p></li>
+          <li class="beat" data-t="2100"><span class="n">3</span><p>Invade el carril del camión<small>Al intentar volver a su carril pierde el control y queda atravesado enfrente. El camión frena, pero no hay distancia.</small></p></li>
+          <li class="beat impacto" data-t="2850"><span class="n">4</span><p>Impacto y vuelco<small>El frente del camión golpea el lateral derecho del auto. El auto sale en diagonal hacia los pastizales; el camión vuelca sobre su lateral derecho.</small></p></li>
+        </ol>
+        <button class="btn hueco" onclick="reproducir()"><svg class="ic"><use href="#i-play"/></svg> <span id="btnPlayTxt">Reproducir el choque</span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 3 · LA ESCENA ========== -->
+  <section class="pantalla" id="p3">
+    <h2>La escena, <em>pieza por pieza</em></h2>
+    <p class="bajada">El investigador no se queda con el relato: va al lugar, lo fotografía y busca que cada detalle físico coincida con lo declarado. Tocá cada pieza.</p>
+    <div class="rejilla">
+      <button class="voltea" onclick="girar(this)">
+        <span class="cara frente"><svg class="ic"><use href="#i-ruta"/></svg><span class="rot">La calzada</span><span class="pista">tocá para ver</span></span>
+        <span class="cara dorso"><b>La calzada</b>Tramo recto, un carril por mano, banquinas de tierra. El asfalto estaba en buen estado de conservación: no hubo un pozo ni una rotura que explicara la maniobra.</span>
+      </button>
+      <button class="voltea" onclick="girar(this)">
+        <span class="cara frente"><svg class="ic"><use href="#i-lluvia"/></svg><span class="rot">El clima</span><span class="pista">tocá para ver</span></span>
+        <span class="cara dorso"><b>El clima</b>Condiciones inestables con lluvia. Menos visibilidad para los dos conductores y una calzada húmeda que le quitó adherencia a los neumáticos.</span>
+      </button>
+      <button class="voltea" onclick="girar(this)">
+        <span class="cara frente"><svg class="ic"><use href="#i-camion"/></svg><span class="rot">La señalización</span><span class="pista">tocá para ver</span></span>
+        <span class="cara dorso"><b>La señalización</b>Línea blanca discontinua del lado del camión y línea amarilla continua del lado contrario. Esa marca amarilla prohibía justamente el tipo de invasión que terminó en el choque.</span>
+      </button>
+      <button class="voltea" onclick="girar(this)">
+        <span class="cara frente"><svg class="ic"><use href="#i-auto"/></svg><span class="rot">La posición final</span><span class="pista">tocá para ver</span></span>
+        <span class="cara dorso"><b>La posición final</b>El auto se desplazó en diagonal y quedó entre los pastizales, a varios metros del asfalto. Quedó marcada la huella continua de su entrada a la banquina: un rastro difícil de fabricar.</span>
+      </button>
+      <button class="voltea" onclick="girar(this)">
+        <span class="cara frente"><svg class="ic"><use href="#i-volcado"/></svg><span class="rot">El vuelco</span><span class="pista">tocá para ver</span></span>
+        <span class="cara dorso"><b>El vuelco</b>El camión golpeó con su sector delantero derecho, siguió en diagonal hacia la banquina y volcó sobre su lateral derecho. Quedó con la puerta del conductor mirando al cielo.</span>
+      </button>
+      <button class="voltea" onclick="girar(this)">
+        <span class="cara frente"><svg class="ic"><use href="#i-frasco"/></svg><span class="rot">El control médico</span><span class="pista">tocá para ver</span></span>
+        <span class="cara dorso"><b>El control médico</b>Hubo policía y ambulancia en el lugar. Al camionero lo trasladaron al hospital, donde le hicieron una extracción de sangre. Al cerrarse el informe, el resultado todavía no había llegado.</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ========== 4 · SOSPECHAS ========== -->
+  <section class="pantalla" id="p4">
+    <h2>Seis sospechas <em>sobre la mesa</em></h2>
+    <p class="bajada">Ninguna aseguradora paga un siniestro grande sin descartar seis formas típicas de fraude. Cada una se descarta con una prueba concreta: elegí cuál. Ojo, las tres opciones son verdaderas, pero solo una prueba algo.</p>
+    <div class="marcador">
+      <div class="marcador-barra"><div class="marcador-relleno" id="relleno"></div></div>
+      <span class="marcador-txt" id="contador">1 / 6</span>
+    </div>
+    <div id="slot"></div>
+  </section>
+
+  <!-- ========== 5 · VEREDICTO ========== -->
+  <section class="pantalla" id="p5">
+    <h2>El veredicto</h2>
+    <div class="sello-zona">
+      <div class="sello">Hecho real</div>
+      <div class="puntos-grandes" id="puntosGrandes">0</div>
+      <div class="puntos-label">Puntos</div>
+      <div class="desglose">
+        <div><b id="dAciertos">0/6</b><span>Aciertos</span></div>
+        <div><b id="dTiempo">0:00</b><span>Tiempo</span></div>
+        <div class="bonus"><b id="dBonus">+0</b><span>Bonus</span></div>
+      </div>
+      <div><span class="rango" id="rango">Auxiliar</span></div>
+      <p class="msj" id="msjFinal"></p>
+    </div>
+
+    <div class="rank-caja">
+      <div class="rank-titulo"><svg class="ic"><use href="#i-escudo"/></svg> Ranking del día</div>
+      <p class="rank-sub" id="rankSub">Cargando…</p>
+      <div class="rank-lista" id="rankLista"></div>
+      <div class="codigo-val" id="codigoVal" style="display:none"></div>
+    </div>
+    <div class="papel">
+      <h3>Por qué se calificó como real</h3>
+      <ul>
+        <li><b>Coherencia física.</b> Las fotos, las huellas en la banquina y el sector golpeado del camión cuentan la misma historia que el conductor.</li>
+        <li><b>Intervención inmediata.</b> Policía y asistencia médica actuaron el mismo día, con otros automovilistas detenidos como testigos.</li>
+        <li><b>Voluntad de control.</b> El conductor se sometió a extracción de sangre y firmó su declaración jurada.</li>
+        <li><b>Documentación vigente.</b> Las habilitaciones del tractor y del semirremolque se verificaron una por una.</li>
+        <li><b>Riesgo cubierto.</b> Es un choque, un riesgo amparado por la póliza, ocurrido dentro de su vigencia.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ========== 6 · DESPUÉS ========== -->
+  <section class="pantalla" id="p6">
+    <h2>Que sea real <em>no cierra el caso</em></h2>
+    <p class="bajada">Un expediente de seguro y un expediente judicial responden preguntas distintas y avanzan por caminos separados.</p>
+    <div class="papel">
+      <h3>Dos investigaciones en paralelo</h3>
+      <p>La verificación del seguro responde una sola pregunta: <b>¿el hecho ocurrió como se denunció y está cubierto?</b> No decide de quién es la culpa. Como el conductor del automóvil falleció, la Justicia abrió una causa penal para determinar responsabilidades legales, con su propio sumario y su propia fiscalía.</p>
+      <p>Por eso el estudio recomendó avanzar hacia un acuerdo de indemnización, pero <b>sujeto a lo que vaya resolviendo la causa penal</b>: si algo cambia allí, cambia también la posición de la aseguradora.</p>
+    </div>
+    <div class="papel">
+      <h3>Lo que hace un investigador antes de firmar</h3>
+      <ul class="chk">
+        <li><svg class="ic"><use href="#i-tilde"/></svg> Verificación en comisaría</li>
+        <li><svg class="ic"><use href="#i-tilde"/></svg> Relevamiento del lugar del hecho</li>
+        <li><svg class="ic"><use href="#i-tilde"/></svg> Entrevista al asegurado</li>
+        <li><svg class="ic"><use href="#i-tilde"/></svg> Entrevista al conductor</li>
+        <li><svg class="ic"><use href="#i-tilde"/></svg> Inspección física del vehículo</li>
+        <li><svg class="ic"><use href="#i-tilde"/></svg> Antecedentes del vehículo</li>
+        <li><svg class="ic"><use href="#i-tilde"/></svg> Verificación de preexistencias</li>
+        <li><svg class="ic"><use href="#i-tilde"/></svg> Peritaje y estimación del daño</li>
+        <li><svg class="ic"><use href="#i-tilde"/></svg> Seguimiento de la causa penal</li>
+        <li><svg class="ic"><use href="#i-tilde"/></svg> Revisión de la estrategia si cambia una declaración</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ========== 7 · GLOSARIO ========== -->
+  <section class="pantalla" id="p7">
+    <h2>Glosario del <em>expediente</em></h2>
+    <p class="bajada">Ocho palabras que aparecen en cualquier informe de siniestros. Tocá para ver la definición.</p>
+    <div class="rejilla">
+      <button class="voltea glos" onclick="girar(this)"><span class="cara frente"><span class="rot">Siniestro</span><span class="pista">tocá</span></span><span class="cara dorso">El hecho dañoso —choque, robo, incendio— que la póliza cubre. No es sinónimo de tragedia: es el término técnico del contrato.</span></button>
+      <button class="voltea glos" onclick="girar(this)"><span class="cara frente"><span class="rot">Asegurado</span><span class="pista">tocá</span></span><span class="cara dorso">La persona o empresa titular de la póliza. Acá es la empresa de transporte, no el chofer que manejaba.</span></button>
+      <button class="voltea glos" onclick="girar(this)"><span class="cara frente"><span class="rot">Liquidador</span><span class="pista">tocá</span></span><span class="cara dorso">El estudio independiente que la aseguradora contrata para investigar el siniestro e informar qué pasó realmente.</span></button>
+      <button class="voltea glos" onclick="girar(this)"><span class="cara frente"><span class="rot">Perito</span><span class="pista">tocá</span></span><span class="cara dorso">El especialista que mide técnicamente el daño y le pone un número: mecánico, médico, accidentológico.</span></button>
+      <button class="voltea glos" onclick="girar(this)"><span class="cara frente"><span class="rot">Hoja de ruta</span><span class="pista">tocá</span></span><span class="cara dorso">La lista de verificaciones obligatorias que el investigador va tildando caso por caso, para que nada quede librado a la memoria.</span></button>
+      <button class="voltea glos" onclick="girar(this)"><span class="cara frente"><span class="rot">Hecho armado</span><span class="pista">tocá</span></span><span class="cara dorso">Un siniestro montado a propósito para cobrar el seguro. Es la sospecha más grave que puede levantar un informe.</span></button>
+      <button class="voltea glos" onclick="girar(this)"><span class="cara frente"><span class="rot">Preexistencia</span><span class="pista">tocá</span></span><span class="cara dorso">Un daño que ya existía antes del hecho denunciado y que, por lo tanto, la póliza no debería pagar.</span></button>
+      <button class="voltea glos" onclick="girar(this)"><span class="cara frente"><span class="rot">Causa penal</span><span class="pista">tocá</span></span><span class="cara dorso">El expediente judicial que investiga si hubo delito y quién es responsable. Corre por separado del trámite del seguro.</span></button>
+    </div>
+  </section>
+
+  <!-- ========== 8 · CIERRE ========== -->
+  <section class="pantalla" id="p8">
+    <h2>Expediente <em>cerrado</em></h2>
+    <div class="creditos">
+      <p class="bajada" style="margin:0 auto 4px;">Este juego está construido sobre un informe real de relevamiento de un siniestro vial ocurrido en la Ruta Nacional 9. Se cambiaron los nombres de las personas y de las empresas, y se omitieron los datos del estudio interviniente.</p>
+      <div class="campo">Proyecto de Feria de Ciencias<br><strong>Ahumada &amp; Aliendro</strong><br>Equipo: Siniestros<br>ISCET — 2026</div>
+      <button class="btn rojo pulso" onclick="reiniciar()"><svg class="ic"><use href="#i-repetir"/></svg> Investigar de nuevo</button>
+    </div>
+  </section>
+
+</div>
+
+<div class="modal-fondo" id="modalFondo" role="dialog" aria-modal="true" aria-labelledby="modalTit">
+  <div class="modal">
+    <svg class="ic ic-alerta"><use href="#i-alerta"/></svg>
+    <h3 id="modalTit">Faltan preguntas</h3>
+    <p>Todavía quedan <b id="modalFaltan">varias</b> sin responder. Si salteás ahora, esas sospechas cuentan como no descartadas y el expediente se cierra con lo que llevás.</p>
+    <div class="modal-botones">
+      <button class="btn" onclick="cerrarModal()">Volver a las preguntas</button>
+      <button class="btn hueco" onclick="cerrarModal(); finalizarJuego();">Saltear igual</button>
+    </div>
+  </div>
+</div>
+
+<footer class="nav">
+  <button class="nav-btn atras" id="btnAtras" onclick="ir(actual-1)" aria-label="Atrás"><svg class="ic"><use href="#i-flecha-izq"/></svg></button>
+  <button class="nav-btn" id="btnAdelante">Siguiente <svg class="ic"><use href="#i-flecha"/></svg></button>
+</footer>
+
+<script>
+/* ============================================================
+   CONFIGURACIÓN
+   ============================================================
+   El ranking se guarda en cada teléfono por separado y cada
+   partida emite un CÓDIGO DE VALIDACIÓN para cargar a mano en
+   la tabla general del stand. No necesita internet ni servidor.
+   ============================================================ */
+const CONFIG = {
+  PUNTOS_POR_ACIERTO: 200,   // 6 aciertos = 1200
+  BONUS_MAX: 150,            // menor que un acierto: la precisión siempre manda
+  SEG_BONUS_PLENO: 120,      // hasta este tiempo, bonus completo
+  SEG_BONUS_CERO: 270,       // desde este tiempo, bonus cero
+  TOP: 10
+};
+
+/* ==================== cronómetro ==================== */
+let tInicio = null, tFin = null, relojInt = null;
+let alias = '';
+
+function empezar(){
+  const v = (document.getElementById('alias').value || '').trim().toUpperCase().slice(0,14);
+  alias = v || 'ANÓNIMO';
+  ir(1);
+}
+function arrancarCrono(){
+  tInicio = Date.now(); tFin = null;
+  document.getElementById('crono').classList.add('on');
+  clearInterval(relojInt);
+  relojInt = setInterval(pintarCrono, 1000);
+  pintarCrono();
+}
+function segundos(){
+  if(!tInicio) return 0;
+  return Math.round(((tFin||Date.now()) - tInicio)/1000);
+}
+function mmss(s){ return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); }
+function pintarCrono(){ document.getElementById('cronoTxt').textContent = mmss(segundos()); }
+function pararCrono(){
+  if(tFin) return;
+  tFin = Date.now();
+  clearInterval(relojInt); relojInt = null;
+  pintarCrono();
+}
+
+/* ==================== navegación ==================== */
+const etapas = ["Portada","El caso","Reconstrucción","La escena","Sospechas","Veredicto","Después","Glosario","Cierre"];
+const kmBase = 848;
+const pantallas = etapas.map((_,i)=>document.getElementById('p'+i));
+let actual = 0;
+
+const ticksWrap = document.getElementById('ticks');
+etapas.forEach((t,i)=>{
+  const b = document.createElement('button');
+  b.className = 'tick'; b.id = 'tick-'+i;
+  b.setAttribute('aria-label','Ir a '+t);
+  b.onclick = ()=>ir(i);
+  ticksWrap.appendChild(b);
+});
+
+function ir(n, forzar){
+  n = Math.max(0, Math.min(pantallas.length-1, n));
+  /* no se puede saltear el quiz sin avisar */
+  if(actual===4 && n>4 && juegoIniciado && !juegoTerminado && !forzar){
+    abrirModal(); return;
+  }
+  pantallas[actual].classList.remove('activa');
+  actual = n;
+  pantallas[actual].classList.add('activa');
+
+  etapas.forEach((_,i)=>{
+    const t = document.getElementById('tick-'+i);
+    t.classList.toggle('actual', i===actual);
+    t.classList.toggle('visto', i<actual);
+  });
+
+  const avance = actual/(pantallas.length-1);
+  const pista = document.querySelector('.ruta-asfalto');
+  document.getElementById('camionMarca').style.left = (avance*(pista.clientWidth-26))+'px';
+  document.getElementById('rutaHecho').style.width = (avance*100)+'%';
+
+  document.getElementById('kmTxt').textContent = 'km '+(kmBase+actual);
+  document.getElementById('etapaTxt').textContent = etapas[actual];
+  document.getElementById('btnAtras').disabled = actual===0;
+
+  const ade = document.getElementById('btnAdelante');
+  if(actual===pantallas.length-1){
+    ade.innerHTML = '<svg class="ic"><use href="#i-repetir"/></svg> Reiniciar';
+    ade.onclick = reiniciar;
+  } else {
+    ade.innerHTML = 'Siguiente <svg class="ic"><use href="#i-flecha"/></svg>';
+    ade.onclick = ()=>ir(actual+1);
+  }
+  if(actual===4 && !juegoIniciado) iniciarJuego();
+  if(actual===5) animarPuntaje();
+  window.scrollTo({top:0,behavior:'auto'});
+}
+window.addEventListener('resize', ()=>ir(actual));
+function girar(el){ el.classList.toggle('girada'); }
+
+/* ==================== simulación ==================== */
+const sim = document.getElementById('sim');
+const beats = [...document.querySelectorAll('#beats .beat')];
+let temporizadores = [];
+const sinMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* al terminar la animación del camión: se saca .corre (frenan las líneas) y se fija el estado final */
+document.getElementById('camion').addEventListener('animationend', ()=>{
+  sim.classList.remove('corre');
+  sim.classList.add('fin');
+});
+
+function reproducir(){
+  temporizadores.forEach(clearTimeout); temporizadores = [];
+  beats.forEach(b=>b.classList.remove('on'));
+  sim.classList.remove('corre','fin');
+  document.getElementById('btnPlayTxt').textContent = 'Repetir el choque';
+
+  /* deja la simulación a la vista antes de arrancar */
+  const marco = sim.closest('.sim-marco');
+  const cabecera = document.querySelector('header.tramo').offsetHeight;
+  const y = marco.getBoundingClientRect().top + window.scrollY - cabecera - 12;
+  window.scrollTo({top: Math.max(0, y), behavior: sinMovimiento ? 'auto' : 'smooth'});
+
+  if(sinMovimiento){
+    sim.classList.add('fin');
+    beats.forEach(b=>b.classList.add('on'));
+    return;
+  }
+  /* doble frame: reinicia las animaciones CSS de forma confiable en SVG */
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    sim.classList.add('corre');
+    beats.forEach(b=>{
+      temporizadores.push(setTimeout(()=>{
+        beats.forEach(x=>x.classList.remove('on'));
+        b.classList.add('on');
+      }, +b.dataset.t));
+    });
+    temporizadores.push(setTimeout(()=>beats.forEach(b=>b.classList.add('on')), 4600));
+  }));
+}
+
+/* ==================== juego ==================== */
+const sospechas = [
+  {
+    t:"Hecho armado", def:"Un choque montado a propósito para cobrar el seguro.",
+    q:"¿Con qué prueba se descarta que todo haya sido un montaje?",
+    ops:[
+      "El camión transportaba carga peligrosa con las placas reglamentarias de identificación de riesgo colocadas, tal como exige la normativa vigente para el traslado de combustible en rutas nacionales.",
+      "Cuando llegó la policía ya había otros automovilistas detenidos sobre la banquina que habían presenciado la secuencia completa, y esa misma mañana intervinieron una ambulancia y personal policial que actuó en el lugar.",
+      "El conductor es chofer de empresa desde hace años y venía cumpliendo un recorrido habitual, con una parada previa documentada para cargar combustible y rendir el viaje del día anterior."
+    ], ok:1,
+    exp:"Un hecho armado necesita ocurrir sin testigos y sin intervención oficial inmediata. Que el camión estuviera bien señalizado o que el viaje fuera rutinario son datos ciertos, pero describen la normalidad previa: no prueban que el choque haya ocurrido de verdad. Los testigos y los organismos que actuaron en el momento, sí."
+  },
+  {
+    t:"Préstamo de póliza", def:"Que maneje alguien distinto del que después se declara.",
+    q:"¿Qué elemento descarta que haya manejado otra persona?",
+    ops:[
+      "El conductor entrevistado por el investigador es la misma persona que fue asistida en el hospital esa mañana y la misma que figura como conductor del evento, y cuenta con la habilitación para esa categoría de vehículo.",
+      "La póliza de la unidad se encontraba vigente al momento del siniestro, contratada con anterioridad al hecho y sin suspensiones de cobertura registradas por la aseguradora.",
+      "El camión estaba realizando un viaje de trabajo con la carga completa hacia otra provincia, lo que confirma que se lo usaba dentro de la actividad declarada por la empresa asegurada."
+    ], ok:0,
+    exp:"Que la póliza esté al día y que el viaje fuera laboral son ciertos, pero hablan del contrato y del uso del camión, no de quién iba al volante. Lo que cierra la sospecha es la cadena de identidad: el que dice haber manejado, el que fue atendido en el hospital y el que está habilitado tienen que ser la misma persona."
+  },
+  {
+    t:"Documentación apócrifa", def:"Papeles falsos o vencidos presentados como válidos.",
+    q:"¿Qué verificación descarta que la documentación sea falsa?",
+    ops:[
+      "El informe de relevamiento incluye un álbum fotográfico extenso del lugar del hecho, de los dos vehículos y de cada uno de los daños, tomado por personal del estudio durante la inspección presencial.",
+      "El conductor firmó un formulario de declaración jurada ante el personal del estudio, donde asentó su versión del hecho y sus datos personales bajo responsabilidad legal.",
+      "Los certificados del tractor y del semirremolque se controlaron por separado ante los organismos que los emiten, verificando número, vigencia y categoría, y los datos coincidían con los registros oficiales."
+    ], ok:2,
+    exp:"Un álbum de fotos prueba los daños, no los papeles. Y una declaración jurada la firma también quien miente. Un documento solo se valida contra la base del organismo que lo emitió, y en transporte de carga eso significa chequear por separado el tractor y el acoplado, que tienen habilitaciones distintas."
+  },
+  {
+    t:"Cambio de circunstancias", def:"Modificar quién manejaba, cuándo o cómo pasó el hecho.",
+    q:"¿Qué prueba que la historia no fue cambiada sobre la marcha?",
+    ops:[
+      "El conductor informó por propia iniciativa que había tenido un accidente vial anterior, en 1996, manejando para otra empresa de transporte, sin que el investigador se lo preguntara.",
+      "La versión se mantuvo sin variaciones entre la denuncia inicial y la entrevista presencial posterior, y cada detalle —el sentido de circulación, el sector del impacto y la salida a la banquina— coincide con las huellas y la posición final de los vehículos.",
+      "Se pudo reconstruir con precisión el itinerario previo del camión: la noche anterior en una terminal, la carga a la mañana siguiente y una parada intermedia para cargar combustible."
+    ], ok:1,
+    exp:"Contar un accidente viejo sin que se lo pregunten genera buena impresión, y un itinerario detallado suena sólido, pero ninguna de las dos cosas impide que el relato del choque haya cambiado. Lo único que lo impide es que la versión se mantenga igual entre entrevistas y que además choque contra la evidencia física del terreno."
+  },
+  {
+    t:"Magnificación de daños", def:"Inflar el daño real para cobrar de más.",
+    q:"¿Qué descarta que los daños estén exagerados?",
+    ops:[
+      "Cada daño tiene un mecanismo que lo explica dentro del relato: el sector delantero derecho corresponde a la colisión con el automóvil y las deformaciones del lateral derecho de la cisterna al vuelco posterior, todo medido por los peritos sobre el vehículo.",
+      "De los 35.935 litros de gasoil que transportaba la cisterna solo se perdieron 4.935, lo que demuestra que el tanque resistió el vuelco sin sufrir una rotura generalizada de su estructura.",
+      "El camión fue trasladado a un taller cerrado donde quedó a disposición del estudio, lo que permitió inspeccionarlo con luz adecuada y fotografiarlo desde todos sus ángulos."
+    ], ok:0,
+    exp:"Que se haya derramado poco combustible o que el peritaje se haya hecho cómodo son datos reales, pero no dicen nada sobre si el daño fue inflado. La clave no es cuánto daño hay, sino si cada golpe tiene una causa dentro del relato. Un daño suelto, sin mecanismo que lo explique, es la señal típica de magnificación."
+  },
+  {
+    t:"Preexistencia de daños", def:"Daños viejos presentados como parte de este choque.",
+    q:"¿Qué permite descartar que esos daños ya existieran?",
+    ops:[
+      "El airbag del conductor se activó durante el impacto y el parabrisas quedó estallado, señales compatibles con una colisión de energía considerable ocurrida en ese momento.",
+      "La unidad contaba con su certificación técnica aprobada y con vencimiento posterior a la fecha del siniestro, un control que incluye la verificación del estado general del vehículo.",
+      "La inspección física se cruzó con la verificación de los antecedentes de la unidad y del estado anterior del riesgo, comparando su historial con lo observado, sin hallar daños previos al hecho denunciado."
+    ], ok:2,
+    exp:"El airbag prueba que hubo un impacto fuerte ese día, pero no que todos los daños sean de ese impacto. Y una certificación vigente controla condiciones de seguridad, no el estado estético ni estructural completo. Descartar preexistencias exige revisar el historial del riesgo y compararlo con lo que se ve hoy."
+  }
+];
+
+let orden=[], idx=0, puntos=0, respondidas=0, juegoIniciado=false, juegoTerminado=false;
+function mezclar(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function abrirModal(){
+  const faltan = sospechas.length - respondidas;
+  document.getElementById('modalFaltan').textContent =
+    faltan === 1 ? '1 sospecha' : faltan+' sospechas';
+  document.getElementById('modalFondo').classList.add('on');
+}
+function cerrarModal(){ document.getElementById('modalFondo').classList.remove('on'); }
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') cerrarModal(); });
+document.getElementById('modalFondo').addEventListener('click', e=>{
+  if(e.target.id === 'modalFondo') cerrarModal();
+});
+
+function iniciarJuego(){
+  juegoIniciado = true; juegoTerminado = false;
+  orden = mezclar([0,1,2,3,4,5]);
+  idx = 0; puntos = 0; respondidas = 0;
+  arrancarCrono();
+  pintarSospecha();
+}
+
+function pintarSospecha(){
+  const d = sospechas[orden[idx]];
+  const total = sospechas.length;
+  document.getElementById('contador').textContent = (idx+1)+' / '+total;
+  document.getElementById('relleno').style.width = Math.round((idx/total)*100)+'%';
+  const mezcladas = mezclar(d.ops.map((txt,i)=>({txt, ok:i===d.ok})));
+  const letras = ['A','B','C'];
+  document.getElementById('slot').innerHTML =
+    '<div class="sospecha" id="tarjeta">'+
+      '<div class="sos-cabeza"><svg class="ic"><use href="#i-lupa"/></svg>'+
+      '<div><h3>'+d.t+'</h3><div class="def">'+d.def+'</div></div></div>'+
+      '<p class="sos-preg">'+d.q+'</p>'+
+      '<div class="opciones">'+
+        mezcladas.map((o,i)=>'<button class="op" data-ok="'+o.ok+'" onclick="elegir(this)"><span class="letra">'+letras[i]+'</span><span>'+o.txt+'</span></button>').join('')+
+      '</div><div class="fallo" id="fallo"></div>'+
+    '</div>';
+}
+
+function chispas(cont){
+  const colores = ['#FFC803','#FF6A13','#E01E26','#FFFFFF'];
+  for(let i=0;i<16;i++){
+    const s = document.createElement('span');
+    s.className = 'chispa';
+    s.style.setProperty('--dx',(Math.random()*220-110)+'px');
+    s.style.setProperty('--dy',(-Math.random()*140-40)+'px');
+    s.style.setProperty('--rot',(Math.random()*540-270)+'deg');
+    s.style.background = colores[i%4];
+    cont.appendChild(s);
+    setTimeout(()=>s.remove(),950);
+  }
+}
+
+function elegir(btn){
+  const acerto = btn.dataset.ok === 'true';
+  if(acerto) puntos++;
+  respondidas++;
+  document.querySelectorAll('.op').forEach(b=>{
+    b.disabled = true;
+    if(b.dataset.ok === 'true') b.classList.add('buena');
+  });
+  if(!acerto) btn.classList.add('mala');
+
+  const tarjeta = document.getElementById('tarjeta');
+  tarjeta.classList.add(acerto ? 'acertada' : 'fallada');
+  if(acerto && !sinMovimiento) chispas(tarjeta);
+
+  const d = sospechas[orden[idx]];
+  const caja = document.getElementById('fallo');
+  caja.className = 'fallo vista '+(acerto?'acierto':'error');
+  caja.innerHTML =
+    '<b>'+(acerto ? '¡Bien descartada!' : 'Esa prueba no alcanza')+'</b>'+ d.exp +
+    '<div class="accion"><button class="btn" onclick="siguienteSospecha()">'+
+    (idx === sospechas.length-1 ? 'Ver el veredicto' : 'Siguiente sospecha')+
+    ' <svg class="ic"><use href="#i-flecha"/></svg></button></div>';
+  caja.scrollIntoView({block:'nearest', behavior:'smooth'});
+}
+
+let resultado = null;
+
+function calcularBonus(seg){
+  const {BONUS_MAX:B, SEG_BONUS_PLENO:A, SEG_BONUS_CERO:Z} = CONFIG;
+  if(seg <= A) return B;
+  if(seg >= Z) return 0;
+  return Math.round(B * (Z - seg) / (Z - A));
+}
+
+function siguienteSospecha(){
+  if(idx < sospechas.length-1){ idx++; pintarSospecha(); }
+  else{ finalizarJuego(); }
+}
+
+function finalizarJuego(){
+  juegoTerminado = true;
+  document.getElementById('relleno').style.width = '100%';
+  pararCrono();
+
+  const seg = segundos();
+  const bonus = calcularBonus(seg);
+  const total = puntos*CONFIG.PUNTOS_POR_ACIERTO + bonus;
+  const salteadas = sospechas.length - respondidas;
+  let r,m;
+  if(puntos===6){ r='Investigador Senior'; m='Puntaje perfecto: separaste la prueba útil del dato que solo suena bien.'; }
+  else if(puntos>=4){ r='Perito'; m='Buen criterio. Te faltó afinar en qué prueba cierra realmente cada sospecha.'; }
+  else if(puntos>=2){ r='Auxiliar'; m='Vas entendiendo la lógica: no alcanza con que un dato sea cierto, tiene que probar algo.'; }
+  else{ r='Aprendiz'; m='Cuesta más de lo que parece, y por eso existe una hoja de ruta con decenas de verificaciones.'; }
+  if(salteadas > 0){
+    m = 'Cerraste el expediente con '+salteadas+(salteadas===1?' sospecha':' sospechas')+' sin revisar. '+m;
+  }
+
+  resultado = {alias, aciertos:puntos, respondidas, seg, bonus, total, rango:r, ts:Date.now(), id:idPartida()};
+  document.getElementById('rango').textContent = r;
+  document.getElementById('msjFinal').textContent = m;
+  document.getElementById('dAciertos').textContent = puntos+'/6';
+  document.getElementById('dTiempo').textContent = mmss(seg);
+  document.getElementById('dBonus').textContent = '+'+bonus;
+  ir(5, true);
+  cerrarPartida();
+}
+
+function idPartida(){
+  return Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+}
+
+function animarPuntaje(){
+  const el = document.getElementById('puntosGrandes');
+  const meta = resultado ? resultado.total : 0;
+  if(!meta){ el.textContent = '0'; return; }
+  const pasos = 28, inc = meta/pasos;
+  let n = 0, i = 0;
+  const t = setInterval(()=>{
+    i++; n = Math.min(meta, Math.round(inc*i));
+    el.textContent = n;
+    if(i>=pasos){ el.textContent = meta; clearInterval(t); }
+  }, 32);
+}
+
+/* ==================== ranking ==================== */
+const CLAVE_LOCAL = 'ruta9_ranking_v1';
+
+function leerLocal(){
+  try{ return JSON.parse(localStorage.getItem(CLAVE_LOCAL) || '[]'); }
+  catch(e){ return []; }
+}
+function guardarLocal(reg){
+  try{
+    const l = leerLocal();
+    l.push(reg);
+    localStorage.setItem(CLAVE_LOCAL, JSON.stringify(l.slice(-300)));
+  }catch(e){ /* navegador en modo privado: la partida igual se muestra */ }
+}
+
+function cerrarPartida(){
+  guardarLocal(resultado);
+
+  const sub = document.getElementById('rankSub');
+  const lista = document.getElementById('rankLista');
+
+  const todos = leerLocal();
+  todos.sort((a,b)=> b.total - a.total || a.seg - b.seg || a.ts - b.ts);
+  const top = todos.slice(0, CONFIG.TOP);
+  const miPos = todos.findIndex(x=>x.id === resultado.id);
+
+  sub.textContent = todos.length > 1
+    ? 'Mejores partidas jugadas en este teléfono.'
+    : 'Tu primera partida en este teléfono.';
+
+  lista.innerHTML = top.map((x,i)=>
+    '<div class="rank-fila'+(x.id===resultado.id?' yo':'')+'">'+
+      '<span class="pos">'+(i+1)+'</span>'+
+      '<span class="quien"><b>'+escapar(x.alias||'ANÓNIMO')+'</b>'+
+      '<span>'+x.aciertos+'/6 · '+mmss(x.seg)+'</span></span>'+
+      '<span class="pts">'+x.total+'</span>'+
+    '</div>').join('');
+
+  if(miPos >= CONFIG.TOP){
+    lista.innerHTML += '<div class="rank-fila yo" style="margin-top:6px">'+
+      '<span class="pos">'+(miPos+1)+'</span>'+
+      '<span class="quien"><b>'+escapar(resultado.alias)+'</b>'+
+      '<span>'+resultado.aciertos+'/6 · '+mmss(resultado.seg)+'</span></span>'+
+      '<span class="pts">'+resultado.total+'</span></div>';
+  }
+
+  const cod = document.getElementById('codigoVal');
+  cod.style.display = 'block';
+  cod.innerHTML = resultado.total+' PUNTOS'+
+    '<small>Decí tu nombre y este puntaje en el stand para entrar en el ranking general del día</small>';
+}
+
+function escapar(s){
+  return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function reiniciar(){
+  document.querySelectorAll('.voltea').forEach(c=>c.classList.remove('girada'));
+  temporizadores.forEach(clearTimeout); temporizadores = [];
+  sim.classList.remove('corre','fin');
+  beats.forEach(b=>b.classList.remove('on'));
+  document.getElementById('btnPlayTxt').textContent = 'Reproducir el choque';
+  juegoIniciado = false; juegoTerminado = false; respondidas = 0;
+  cerrarModal();
+  clearInterval(relojInt); relojInt = null;
+  tInicio = null; tFin = null; resultado = null;
+  document.getElementById('crono').classList.remove('on');
+  document.getElementById('cronoTxt').textContent = '0:00';
+  document.getElementById('alias').value = alias === 'ANÓNIMO' ? '' : alias;
+  document.getElementById('rankLista').innerHTML = '';
+  document.getElementById('rankSub').textContent = 'Cargando…';
+  document.getElementById('codigoVal').style.display = 'none';
+  ir(0);
+}
+
+ir(0);
+</script>
+</body>
+</html>
