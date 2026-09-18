@@ -40,7 +40,7 @@
     -webkit-font-smoothing:antialiased;
     overflow-x:hidden;
   }
-  button{font-family:inherit;}
+  button{font-family:inherit;touch-action:manipulation;}
   :focus-visible{outline:3px solid var(--amarillo);outline-offset:3px;border-radius:4px;}
   .ic{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
 
@@ -54,6 +54,10 @@
     padding:8px 12px 9px;
     padding-top:calc(8px + env(safe-area-inset-top));
     box-shadow:0 6px 20px rgba(0,0,0,.6);
+    /* capa propia: evita que la barra se arrastre al scrollear en el celular */
+    transform:translateZ(0);
+    will-change:transform;
+    backface-visibility:hidden;
   }
   .tramo-fila{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px;}
   .placa-adr{
@@ -375,18 +379,22 @@
     border-top:2px solid var(--borde);display:flex;align-items:center;gap:10px;
     padding:10px 14px;padding-bottom:calc(10px + env(safe-area-inset-bottom));
     box-shadow:0 -6px 22px rgba(0,0,0,.6);
+    /* capa propia: sin esto la barra "flota" con retraso al scrollear */
+    transform:translateZ(0);
+    will-change:transform;
+    backface-visibility:hidden;
   }
   .nav-btn{
     display:inline-flex;align-items:center;justify-content:center;gap:7px;
     background:linear-gradient(135deg,var(--amarillo),var(--naranja));color:#180A00;border:none;
     font-family:var(--display);font-weight:900;font-size:.95rem;letter-spacing:.3px;text-transform:uppercase;
-    padding:13px 20px;border-radius:11px;cursor:pointer;flex:1;
-    box-shadow:0 5px 0 var(--naranja-osc);transition:transform .1s ease;
+    padding:13px 20px;border-radius:11px;cursor:pointer;flex:1;min-height:52px;
+    box-shadow:0 5px 0 var(--naranja-osc);transition:transform .08s ease, filter .08s ease;
   }
-  .nav-btn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--naranja-osc);}
+  .nav-btn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--naranja-osc);filter:brightness(.92);}
   .nav-btn .ic{width:18px;height:18px;}
-  .nav-btn.atras{background:transparent;color:var(--blanco);border:2px solid var(--borde);box-shadow:none;flex:0 0 auto;padding:13px 16px;}
-  .nav-btn.atras:active{transform:translateY(2px);}
+  .nav-btn.atras{background:transparent;color:var(--blanco);border:2px solid var(--borde);box-shadow:none;flex:0 0 auto;padding:13px 18px;min-width:58px;}
+  .nav-btn.atras:active{transform:translateY(2px);background:var(--negro-3);}
   .nav-btn:disabled{opacity:.25;cursor:default;}
 
   /* ==================== CRONÓMETRO ==================== */
@@ -884,10 +892,7 @@ function ir(n, forzar){
     t.classList.toggle('visto', i<actual);
   });
 
-  const avance = actual/(pantallas.length-1);
-  const pista = document.querySelector('.ruta-asfalto');
-  document.getElementById('camionMarca').style.left = (avance*(pista.clientWidth-26))+'px';
-  document.getElementById('rutaHecho').style.width = (avance*100)+'%';
+  posicionarCamion();
 
   document.getElementById('kmTxt').textContent = 'km '+(kmBase+actual);
   document.getElementById('etapaTxt').textContent = etapas[actual];
@@ -905,7 +910,21 @@ function ir(n, forzar){
   if(actual===5) animarPuntaje();
   window.scrollTo({top:0,behavior:'auto'});
 }
-window.addEventListener('resize', ()=>ir(actual));
+function posicionarCamion(){
+  const avance = actual/(pantallas.length-1);
+  const pista = document.querySelector('.ruta-asfalto');
+  document.getElementById('camionMarca').style.left = (avance*(pista.clientWidth-26))+'px';
+  document.getElementById('rutaHecho').style.width = (avance*100)+'%';
+}
+
+/* Solo reacomoda el camión. Antes llamaba a ir(), y como en el celular
+   la barra del navegador dispara "resize" al scrollear, la página
+   saltaba sola hacia arriba. */
+let tResize = null;
+window.addEventListener('resize', ()=>{
+  clearTimeout(tResize);
+  tResize = setTimeout(posicionarCamion, 120);
+});
 function girar(el){ el.classList.toggle('girada'); }
 
 /* ==================== simulación ==================== */
