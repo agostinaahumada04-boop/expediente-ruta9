@@ -27,7 +27,7 @@
     --glow-ro:0 0 26px rgba(224,30,38,.5);
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-  html,body{margin:0;padding:0;}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;overscroll-behavior:none;}
   body{
     background:
       radial-gradient(90% 55% at 50% 0%, #1E1A18 0%, transparent 65%),
@@ -103,8 +103,17 @@
   .tick.actual{background:var(--amarillo);box-shadow:var(--glow-am);transform:scaleY(1.7);}
 
   /* ==================== ESTRUCTURA ==================== */
-  #app{padding:104px 0 96px;padding-bottom:calc(96px + env(safe-area-inset-bottom));display:flex;justify-content:center;}
-  .pantalla{display:none;width:100%;max-width:900px;padding:14px 16px 8px;}
+  /* El área central es lo único que scrollea. Su alto se calcula con el
+     alto real de las barras, así no sobra ni falta espacio abajo. */
+  #app{
+    position:fixed;left:0;right:0;
+    top:var(--h-top,100px);
+    bottom:var(--h-bot,76px);
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior:contain;
+  }
+  .pantalla{display:none;width:100%;max-width:900px;margin:0 auto;padding:16px 16px 24px;}
   .pantalla.activa{display:block;animation:entrar .35s cubic-bezier(.2,.8,.3,1);}
   @keyframes entrar{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
 
@@ -506,7 +515,6 @@
   /* durante el cuestionario no hay forma de avanzar sin responder */
   footer.nav.oculta{transform:translateY(130%);pointer-events:none;}
   footer.nav{transition:transform .3s cubic-bezier(.3,.8,.3,1);}
-  #app.sin-nav{padding-bottom:32px;}
   .ticks.bloqueado .tick{pointer-events:none;opacity:.5;}
 
   /* ==================== SONIDO ==================== */
@@ -520,7 +528,7 @@
 
   /* ==================== RACHA ==================== */
   .racha{
-    position:fixed;top:96px;left:50%;transform:translateX(-50%) scale(.6);z-index:65;
+    position:fixed;top:calc(var(--h-top,100px) + 12px);left:50%;transform:translateX(-50%) scale(.6);z-index:65;
     background:linear-gradient(135deg,var(--rojo),var(--naranja));color:#fff;
     font-family:var(--display);font-weight:900;font-size:1rem;letter-spacing:1px;
     padding:8px 20px;border-radius:999px;text-transform:uppercase;
@@ -1066,6 +1074,18 @@ function pararCrono(){
   pintarCrono();
 }
 
+/* ==================== medida del alto real de las barras ====================
+   Sin esto habría que adivinar cuánto ocupan la cabecera y la barra
+   inferior, y sobraría espacio negro al final del scroll. */
+function medirBarras(){
+  const top = document.querySelector('header.tramo').offsetHeight;
+  const nav = document.querySelector('footer.nav');
+  const oculto = nav.classList.contains('oculta');
+  const bot = oculto ? 0 : nav.offsetHeight;
+  document.documentElement.style.setProperty('--h-top', top+'px');
+  document.documentElement.style.setProperty('--h-bot', bot+'px');
+}
+
 /* ==================== navegación ==================== */
 const etapas = ["Portada","El caso","Reconstrucción","La escena","Sospechas","Veredicto","Después","Glosario","Ronda extra","Cierre"];
 const kmBase = 848;
@@ -1120,8 +1140,9 @@ function ir(n, forzar){
   document.querySelector('footer.nav').classList.toggle('oculta', enQuiz);
   document.getElementById('app').classList.toggle('sin-nav', enQuiz);
   document.getElementById('ticks').classList.toggle('bloqueado', enQuiz);
+  medirBarras();
 
-  window.scrollTo({top:0,behavior:'auto'});
+  document.getElementById('app').scrollTop = 0;
 }
 function posicionarCamion(){
   const avance = actual/(pantallas.length-1);
@@ -1136,7 +1157,7 @@ function posicionarCamion(){
 let tResize = null;
 window.addEventListener('resize', ()=>{
   clearTimeout(tResize);
-  tResize = setTimeout(posicionarCamion, 120);
+  tResize = setTimeout(()=>{ posicionarCamion(); medirBarras(); }, 120);
 });
 function girar(el){ el.classList.toggle('girada'); }
 
@@ -1160,9 +1181,9 @@ function reproducir(){
 
   /* deja la simulación a la vista antes de arrancar */
   const marco = sim.closest('.sim-marco');
-  const cabecera = document.querySelector('header.tramo').offsetHeight;
-  const y = marco.getBoundingClientRect().top + window.scrollY - cabecera - 12;
-  window.scrollTo({top: Math.max(0, y), behavior: sinMovimiento ? 'auto' : 'smooth'});
+  const cont = document.getElementById('app');
+  const y = marco.getBoundingClientRect().top - cont.getBoundingClientRect().top + cont.scrollTop - 10;
+  cont.scrollTo({top: Math.max(0, y), behavior: sinMovimiento ? 'auto' : 'smooth'});
 
   if(sinMovimiento){
     sim.classList.add('fin');
@@ -1499,6 +1520,7 @@ function siguienteCasoB(){
   document.querySelector('footer.nav').classList.remove('oculta');
   document.getElementById('app').classList.remove('sin-nav');
   document.getElementById('ticks').classList.remove('bloqueado');
+  medirBarras();
 }
 
 function actualizarLocal(reg){
@@ -1590,7 +1612,9 @@ function reiniciar(){
 }
 
 pintarBotonAudio();
+medirBarras();
 ir(0);
+window.addEventListener('load', medirBarras);
 </script>
 </body>
 </html>
