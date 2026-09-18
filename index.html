@@ -503,6 +503,87 @@
     background:var(--rojo);border-color:var(--rojo);color:#fff;
   }
 
+  /* durante el cuestionario no hay forma de avanzar sin responder */
+  footer.nav.oculta{transform:translateY(130%);pointer-events:none;}
+  footer.nav{transition:transform .3s cubic-bezier(.3,.8,.3,1);}
+  #app.sin-nav{padding-bottom:32px;}
+  .ticks.bloqueado .tick{pointer-events:none;opacity:.5;}
+
+  /* ==================== SONIDO ==================== */
+  .btn-audio{
+    background:var(--negro-3);border:2px solid var(--borde);border-radius:9px;
+    width:36px;height:34px;display:flex;align-items:center;justify-content:center;
+    color:var(--amarillo);cursor:pointer;padding:0;flex:none;
+  }
+  .btn-audio .ic{width:18px;height:18px;stroke-width:2.4;}
+  .btn-audio.mudo{color:#6A6A74;border-color:#2A2A32;}
+
+  /* ==================== RACHA ==================== */
+  .racha{
+    position:fixed;top:96px;left:50%;transform:translateX(-50%) scale(.6);z-index:65;
+    background:linear-gradient(135deg,var(--rojo),var(--naranja));color:#fff;
+    font-family:var(--display);font-weight:900;font-size:1rem;letter-spacing:1px;
+    padding:8px 20px;border-radius:999px;text-transform:uppercase;
+    box-shadow:0 0 34px rgba(255,106,19,.8);opacity:0;pointer-events:none;
+  }
+  .racha.on{animation:rachaPop 1.5s cubic-bezier(.2,.9,.3,1.3) forwards;}
+  @keyframes rachaPop{
+    0%{opacity:0;transform:translateX(-50%) scale(.5) rotate(-8deg);}
+    18%{opacity:1;transform:translateX(-50%) scale(1.15) rotate(3deg);}
+    28%{transform:translateX(-50%) scale(1) rotate(0);}
+    75%{opacity:1;transform:translateX(-50%) scale(1);}
+    100%{opacity:0;transform:translateX(-50%) scale(.9) translateY(-22px);}
+  }
+
+  /* ==================== COMPARTIR ==================== */
+  .acciones-final{display:flex;flex-direction:column;gap:10px;margin-top:18px;}
+  @media(min-width:560px){.acciones-final{flex-direction:row;}}
+  .acciones-final .btn{flex:1;}
+  .copiado{
+    text-align:center;font-family:var(--display);font-size:.8rem;color:var(--amarillo);
+    letter-spacing:1px;text-transform:uppercase;margin-top:8px;height:1em;
+  }
+
+  /* ==================== RONDA EXTRA ==================== */
+  .caso-b-intro{
+    background:linear-gradient(150deg,#2A1210,#1A1014);border:2px solid var(--rojo);
+    border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 0 40px rgba(224,30,38,.25);
+  }
+  .caso-b-intro h3{font-size:1.15rem;color:var(--rojo);margin-bottom:8px;}
+  .caso-b-intro p{color:var(--texto);font-size:.96rem;margin:0;}
+  .denuncia{
+    background:var(--blanco);color:#0E0E10;border-radius:4px 14px 14px 14px;
+    border-left:7px solid var(--rojo);padding:16px 18px;margin-bottom:14px;
+    box-shadow:0 10px 26px rgba(0,0,0,.5);
+  }
+  .denuncia b{font-family:var(--display);font-weight:900;font-size:.78rem;color:var(--rojo);
+    letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:5px;}
+  .denuncia p{margin:0;font-size:1rem;font-weight:600;color:#0E0E10;}
+  .pruebas{display:grid;grid-template-columns:1fr;gap:10px;}
+  @media(min-width:560px){.pruebas{grid-template-columns:1fr 1fr;}}
+  .prueba{
+    display:flex;gap:11px;align-items:flex-start;text-align:left;
+    background:linear-gradient(150deg,var(--negro-2),#121216);border:2px solid var(--borde);
+    border-radius:12px;padding:14px;color:var(--blanco);font-size:.93rem;font-weight:500;
+    cursor:pointer;transition:border-color .15s ease,transform .12s ease,box-shadow .15s ease;
+  }
+  .prueba .num{
+    font-family:var(--display);font-weight:900;background:var(--negro-3);color:var(--amarillo);
+    width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;
+    font-size:.82rem;flex:none;
+  }
+  .prueba:hover:not(:disabled){border-color:var(--amarillo);transform:translateY(-3px);box-shadow:0 8px 22px rgba(255,200,3,.25);}
+  .prueba:disabled{cursor:default;opacity:.4;}
+  .prueba.culpable{border-color:var(--rojo);background:#2A1214;opacity:1;box-shadow:0 0 30px rgba(224,30,38,.5);animation:temblar .4s ease;}
+  .prueba.culpable .num{background:var(--rojo);color:#fff;}
+  .prueba.errada{border-color:#6A6A74;opacity:.55;}
+  .sello-fraude{
+    display:inline-block;border:6px solid var(--rojo);color:var(--rojo);
+    font-family:var(--display);font-weight:900;font-size:clamp(1.5rem,7vw,2.3rem);
+    padding:10px 22px;border-radius:10px;transform:rotate(-5deg);text-transform:uppercase;
+    box-shadow:0 0 40px rgba(224,30,38,.4);animation:sellar .6s cubic-bezier(.2,.9,.25,1.5);
+  }
+
   @media (prefers-reduced-motion: reduce){
     *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;}
   }
@@ -530,6 +611,10 @@
   <symbol id="i-escudo" viewBox="0 0 24 24"><path d="M12 3 4.8 6v6c0 4.3 3 7.7 7.2 9 4.2-1.3 7.2-4.7 7.2-9V6z"/><path d="M9.2 12.2 11.3 14.3 15 10.4"/></symbol>
   <symbol id="i-frasco" viewBox="0 0 24 24"><path d="M10 3h4M11 3v6.2L6.4 17.8A2 2 0 0 0 8.2 21h7.6a2 2 0 0 0 1.8-3.2L13 9.2V3"/><path d="M8.4 15h7.2"/></symbol>
   <symbol id="i-volcado" viewBox="0 0 24 24"><path d="M3.5 18.5h17"/><path d="M5 18.5 7.8 8.3l9.7 2.6-2.7 7.6z"/><circle cx="9.3" cy="6.5" r="1.6"/><path d="M14.6 10.2 16 5"/></symbol>
+  <symbol id="i-sonido" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13L7.5 14.5H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></symbol>
+  <symbol id="i-mudo" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13L7.5 14.5H4z"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></symbol>
+  <symbol id="i-compartir" viewBox="0 0 24 24"><circle cx="18" cy="5.5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="18.5" r="2.6"/><path d="M8.3 10.8 15.7 6.8M8.3 13.2l7.4 4"/></symbol>
+  <symbol id="i-fuego" viewBox="0 0 24 24"><path d="M12 2.8s1.2 3.4-1.4 5.8C8 11 6 12.6 6 15.2a6 6 0 0 0 12 0c0-3.4-2.4-5-3.4-7.2-.6 1.4-1.6 2-1.6 2S13.4 6.6 12 2.8z"/></symbol>
 </svg>
 
 <header class="tramo">
@@ -543,6 +628,7 @@
       <span class="km-actual" id="kmTxt">km 848</span>
       <span class="etapa-actual" id="etapaTxt">Portada</span>
     </div>
+    <button class="btn-audio" id="btnAudio" onclick="alternarSonido()" aria-label="Sonido"><svg class="ic"><use href="#i-sonido" id="iconoAudio"/></svg></button>
   </div>
   <div class="ruta">
     <div class="ruta-asfalto">
@@ -554,6 +640,8 @@
   </div>
 </header>
 
+<div class="racha" id="racha"></div>
+
 <div id="app">
 
   <!-- ========== 0 · PORTADA ========== -->
@@ -562,7 +650,7 @@
       <div>
         <span class="rotulo"><svg class="ic" style="width:14px;height:14px"><use href="#i-carpeta"/></svg> Caso abierto · Ruta 9, km 856</span>
         <h1 class="titulo-hero">Chocaron de frente.<br><span class="amar">¿Pasó como lo cuentan?</span></h1>
-        <p class="texto-hero">Un camión cisterna con 35.935 litros de combustible y un auto que venía en sentido contrario. Un muerto. Y una aseguradora que, antes de pagar, necesita saber si la historia se sostiene. Ese trabajo lo hace un investigador de siniestros: hoy sos vos.</p>
+        <p class="texto-hero">Un camión cisterna, un auto de frente, un muerto. Antes de pagar, la aseguradora necesita saber si la historia se sostiene. Hoy el investigador sos vos.</p>
         <div class="meta-hero">
           <span><svg class="ic"><use href="#i-reloj"/></svg> 5 minutos</span>
           <span><svg class="ic"><use href="#i-repetir"/></svg> Las pistas cambian</span>
@@ -600,26 +688,25 @@
   <!-- ========== 1 · EL CASO ========== -->
   <section class="pantalla" id="p1">
     <h2>Lo que se sabe <em>con certeza</em></h2>
-    <p class="bajada">Antes de sospechar de nadie hay que fijar los hechos. Esto es lo que quedó asentado por la policía, el hospital y la inspección del vehículo.</p>
+    <p class="bajada">Primero los hechos, sin interpretaciones.</p>
     <div class="datos">
-      <div class="dato"><svg class="ic"><use href="#i-calendario"/></svg><div><b>Cuándo</b><span>5 de mayo de 2023, durante la mañana</span></div></div>
-      <div class="dato"><svg class="ic"><use href="#i-pin"/></svg><div><b>Dónde</b><span>Ruta Nacional 9, km 856, entre Santa Elena y Rayo Cortado (Córdoba)</span></div></div>
-      <div class="dato"><svg class="ic"><use href="#i-camion"/></svg><div><b>Vehículo asegurado</b><span>Camión tractor con semirremolque cisterna, sentido sur → norte</span></div></div>
-      <div class="dato"><svg class="ic"><use href="#i-auto"/></svg><div><b>El otro vehículo</b><span>Un automóvil que circulaba en sentido norte → sur</span></div></div>
-      <div class="dato"><svg class="ic"><use href="#i-gota"/></svg><div><b>La carga</b><span>35.935 litros de gasoil. Se derramaron 4.935: el resto quedó contenido</span></div></div>
-      <div class="dato grave"><svg class="ic"><use href="#i-alerta"/></svg><div><b>Consecuencias</b><span>El camionero sufrió raspones en un codo. El conductor del automóvil falleció</span></div></div>
+      <div class="dato"><svg class="ic"><use href="#i-calendario"/></svg><div><b>Cuándo</b><span>5 de mayo de 2023, a la mañana</span></div></div>
+      <div class="dato"><svg class="ic"><use href="#i-pin"/></svg><div><b>Dónde</b><span>Ruta 9, km 856 (Córdoba)</span></div></div>
+      <div class="dato"><svg class="ic"><use href="#i-camion"/></svg><div><b>Asegurado</b><span>Camión cisterna, iba hacia el norte</span></div></div>
+      <div class="dato"><svg class="ic"><use href="#i-auto"/></svg><div><b>El otro</b><span>Un auto, venía de frente</span></div></div>
+      <div class="dato"><svg class="ic"><use href="#i-gota"/></svg><div><b>La carga</b><span>35.935 litros de gasoil</span></div></div>
+      <div class="dato grave"><svg class="ic"><use href="#i-alerta"/></svg><div><b>Consecuencias</b><span>El camionero, raspones. El conductor del auto falleció</span></div></div>
     </div>
     <div class="papel">
-      <h3>La versión del camionero</h3>
-      <p class="cita">Venía por la Ruta 9 con llovizna y el limpiaparabrisas puesto. A poca distancia vio que el auto de enfrente bajaba bruscamente a su banquina, retomaba el asfalto y se cruzaba a la banquina contraria. En el intento de volver a su carril perdió el control y quedó delante del camión. Frenó, pero la distancia era demasiado corta.</p>
-      <p>El camionero tiene 50 años, es chofer de empresa y trabaja en turnos de 24 días con 6 de descanso, 12 horas diarias. Declaró bajo juramento no haber consumido alcohol ni otra sustancia en las 12 horas previas, y en el hospital le hicieron una extracción de sangre para análisis.</p>
+      <h3>Lo que declaró el camionero</h3>
+      <p class="cita">Llovía. El auto de enfrente se fue a la banquina, volvió al asfalto y se cruzó a la contraria. Al querer corregir perdió el control y quedó delante del camión. Frené, pero ya no había distancia.</p>
     </div>
   </section>
 
   <!-- ========== 2 · RECONSTRUCCIÓN ========== -->
   <section class="pantalla" id="p2">
     <h2>Reconstrucción del <em>impacto</em></h2>
-    <p class="bajada">Esto se desprende de las huellas en la banquina, de la posición final de los dos vehículos y del sector del camión que quedó golpeado.</p>
+    <p class="bajada">Reconstruido a partir de las huellas y de dónde terminó cada vehículo.</p>
     <div class="sim-caja">
       <div class="sim-marco">
         <svg class="sim" id="sim" viewBox="0 0 320 520" aria-label="Reconstrucción del choque vista desde arriba">
@@ -658,10 +745,10 @@
       </div>
       <div>
         <ol class="beats" id="beats">
-          <li class="beat" data-t="0"><span class="n">1</span><p>El camión sube por su carril<small>Sentido Santa Elena → Rayo Cortado. Llovizna, asfalto mojado, un carril por mano.</small></p></li>
-          <li class="beat" data-t="900"><span class="n">2</span><p>El auto se va a la banquina y corrige de más<small>Baja bruscamente a la banquina de tierra, retoma el asfalto y se pasa a la banquina contraria.</small></p></li>
-          <li class="beat" data-t="2100"><span class="n">3</span><p>Invade el carril del camión<small>Al intentar volver a su carril pierde el control y queda atravesado enfrente. El camión frena, pero no hay distancia.</small></p></li>
-          <li class="beat impacto" data-t="2850"><span class="n">4</span><p>Impacto y vuelco<small>El frente del camión golpea el lateral derecho del auto. El auto sale en diagonal hacia los pastizales; el camión vuelca sobre su lateral derecho.</small></p></li>
+          <li class="beat" data-t="0"><span class="n">1</span><p>El camión sube por su carril<small>Llovizna, asfalto mojado, un carril por mano.</small></p></li>
+          <li class="beat" data-t="900"><span class="n">2</span><p>El auto se va a la banquina<small>Cae a la tierra, retoma el asfalto y se pasa de largo.</small></p></li>
+          <li class="beat" data-t="2100"><span class="n">3</span><p>Invade el carril del camión<small>Pierde el control y queda atravesado enfrente.</small></p></li>
+          <li class="beat impacto" data-t="2850"><span class="n">4</span><p>Impacto y vuelco<small>El camión frena tarde, lo golpea de frente y vuelca hacia su derecha.</small></p></li>
         </ol>
         <button class="btn hueco" onclick="reproducir()"><svg class="ic"><use href="#i-play"/></svg> <span id="btnPlayTxt">Reproducir el choque</span></button>
       </div>
@@ -671,31 +758,31 @@
   <!-- ========== 3 · LA ESCENA ========== -->
   <section class="pantalla" id="p3">
     <h2>La escena, <em>pieza por pieza</em></h2>
-    <p class="bajada">El investigador no se queda con el relato: va al lugar, lo fotografía y busca que cada detalle físico coincida con lo declarado. Tocá cada pieza.</p>
+    <p class="bajada">El investigador no se queda con el relato: va al lugar. Tocá cada pieza.</p>
     <div class="rejilla">
       <button class="voltea" onclick="girar(this)">
         <span class="cara frente"><svg class="ic"><use href="#i-ruta"/></svg><span class="rot">La calzada</span><span class="pista">tocá para ver</span></span>
-        <span class="cara dorso"><b>La calzada</b>Tramo recto, un carril por mano, banquinas de tierra. El asfalto estaba en buen estado de conservación: no hubo un pozo ni una rotura que explicara la maniobra.</span>
+        <span class="cara dorso"><b>La calzada</b>Recta, un carril por mano, banquinas de tierra. El asfalto estaba en buen estado: ningún pozo explica la maniobra.</span>
       </button>
       <button class="voltea" onclick="girar(this)">
         <span class="cara frente"><svg class="ic"><use href="#i-lluvia"/></svg><span class="rot">El clima</span><span class="pista">tocá para ver</span></span>
-        <span class="cara dorso"><b>El clima</b>Condiciones inestables con lluvia. Menos visibilidad para los dos conductores y una calzada húmeda que le quitó adherencia a los neumáticos.</span>
+        <span class="cara dorso"><b>El clima</b>Lluvia y calzada húmeda: menos visibilidad y menos adherencia para los dos conductores.</span>
       </button>
       <button class="voltea" onclick="girar(this)">
         <span class="cara frente"><svg class="ic"><use href="#i-camion"/></svg><span class="rot">La señalización</span><span class="pista">tocá para ver</span></span>
-        <span class="cara dorso"><b>La señalización</b>Línea blanca discontinua del lado del camión y línea amarilla continua del lado contrario. Esa marca amarilla prohibía justamente el tipo de invasión que terminó en el choque.</span>
+        <span class="cara dorso"><b>La señalización</b>Línea amarilla continua del lado del auto: prohibía justamente la invasión que terminó en el choque.</span>
       </button>
       <button class="voltea" onclick="girar(this)">
-        <span class="cara frente"><svg class="ic"><use href="#i-auto"/></svg><span class="rot">La posición final</span><span class="pista">tocá para ver</span></span>
-        <span class="cara dorso"><b>La posición final</b>El auto se desplazó en diagonal y quedó entre los pastizales, a varios metros del asfalto. Quedó marcada la huella continua de su entrada a la banquina: un rastro difícil de fabricar.</span>
+        <span class="cara frente"><svg class="ic"><use href="#i-auto"/></svg><span class="rot">Dónde terminó</span><span class="pista">tocá para ver</span></span>
+        <span class="cara dorso"><b>Dónde terminó</b>El auto quedó en los pastizales, a metros del asfalto, con la huella de su entrada a la banquina todavía marcada.</span>
       </button>
       <button class="voltea" onclick="girar(this)">
         <span class="cara frente"><svg class="ic"><use href="#i-volcado"/></svg><span class="rot">El vuelco</span><span class="pista">tocá para ver</span></span>
-        <span class="cara dorso"><b>El vuelco</b>El camión golpeó con su sector delantero derecho, siguió en diagonal hacia la banquina y volcó sobre su lateral derecho. Quedó con la puerta del conductor mirando al cielo.</span>
+        <span class="cara dorso"><b>El vuelco</b>El camión golpeó con el frente derecho y volcó. Quedó con la puerta del conductor mirando al cielo.</span>
       </button>
       <button class="voltea" onclick="girar(this)">
-        <span class="cara frente"><svg class="ic"><use href="#i-frasco"/></svg><span class="rot">El control médico</span><span class="pista">tocá para ver</span></span>
-        <span class="cara dorso"><b>El control médico</b>Hubo policía y ambulancia en el lugar. Al camionero lo trasladaron al hospital, donde le hicieron una extracción de sangre. Al cerrarse el informe, el resultado todavía no había llegado.</span>
+        <span class="cara frente"><svg class="ic"><use href="#i-frasco"/></svg><span class="rot">El control</span><span class="pista">tocá para ver</span></span>
+        <span class="cara dorso"><b>El control</b>Hubo policía y ambulancia. Al camionero le hicieron extracción de sangre en el hospital.</span>
       </button>
     </div>
   </section>
@@ -703,7 +790,7 @@
   <!-- ========== 4 · SOSPECHAS ========== -->
   <section class="pantalla" id="p4">
     <h2>Seis sospechas <em>sobre la mesa</em></h2>
-    <p class="bajada">Ninguna aseguradora paga un siniestro grande sin descartar seis formas típicas de fraude. Cada una se descarta con una prueba concreta: elegí cuál. Ojo, las tres opciones son verdaderas, pero solo una prueba algo.</p>
+    <p class="bajada">Seis formas típicas de fraude. Las tres opciones son verdaderas, pero solo una prueba algo. Elegí cuál.</p>
     <div class="marcador">
       <div class="marcador-barra"><div class="marcador-relleno" id="relleno"></div></div>
       <span class="marcador-txt" id="contador">1 / 6</span>
@@ -732,15 +819,19 @@
       <p class="rank-sub" id="rankSub">Cargando…</p>
       <div class="rank-lista" id="rankLista"></div>
       <div class="codigo-val" id="codigoVal" style="display:none"></div>
+      <div class="acciones-final">
+        <button class="btn" onclick="compartir()"><svg class="ic"><use href="#i-compartir"/></svg> Compartir puntaje</button>
+        <button class="btn hueco" onclick="reiniciar()"><svg class="ic"><use href="#i-repetir"/></svg> Reintentar</button>
+      </div>
+      <div class="copiado" id="copiado"></div>
     </div>
     <div class="papel">
       <h3>Por qué se calificó como real</h3>
       <ul>
-        <li><b>Coherencia física.</b> Las fotos, las huellas en la banquina y el sector golpeado del camión cuentan la misma historia que el conductor.</li>
-        <li><b>Intervención inmediata.</b> Policía y asistencia médica actuaron el mismo día, con otros automovilistas detenidos como testigos.</li>
-        <li><b>Voluntad de control.</b> El conductor se sometió a extracción de sangre y firmó su declaración jurada.</li>
-        <li><b>Documentación vigente.</b> Las habilitaciones del tractor y del semirremolque se verificaron una por una.</li>
-        <li><b>Riesgo cubierto.</b> Es un choque, un riesgo amparado por la póliza, ocurrido dentro de su vigencia.</li>
+        <li><b>Todo cierra.</b> Fotos, huellas y daños cuentan la misma historia que el conductor.</li>
+        <li><b>Hubo testigos.</b> Policía y ambulancia actuaron ese mismo día.</li>
+        <li><b>No se escondió.</b> Se sometió a extracción de sangre y firmó su declaración.</li>
+        <li><b>Está cubierto.</b> Es un choque, dentro de la vigencia de la póliza.</li>
       </ul>
     </div>
   </section>
@@ -748,25 +839,22 @@
   <!-- ========== 6 · DESPUÉS ========== -->
   <section class="pantalla" id="p6">
     <h2>Que sea real <em>no cierra el caso</em></h2>
-    <p class="bajada">Un expediente de seguro y un expediente judicial responden preguntas distintas y avanzan por caminos separados.</p>
+    <p class="bajada">El seguro y la Justicia responden preguntas distintas.</p>
     <div class="papel">
       <h3>Dos investigaciones en paralelo</h3>
-      <p>La verificación del seguro responde una sola pregunta: <b>¿el hecho ocurrió como se denunció y está cubierto?</b> No decide de quién es la culpa. Como el conductor del automóvil falleció, la Justicia abrió una causa penal para determinar responsabilidades legales, con su propio sumario y su propia fiscalía.</p>
-      <p>Por eso el estudio recomendó avanzar hacia un acuerdo de indemnización, pero <b>sujeto a lo que vaya resolviendo la causa penal</b>: si algo cambia allí, cambia también la posición de la aseguradora.</p>
+      <p>El seguro responde una sola pregunta: <b>¿pasó como se denunció y está cubierto?</b> No decide de quién es la culpa. Como el conductor del auto falleció, la Justicia abrió una <b>causa penal</b> aparte para eso.</p>
+      <p>Por eso se recomendó avanzar con la indemnización, pero sujeta a lo que resuelva esa causa.</p>
     </div>
     <div class="papel">
-      <h3>Lo que hace un investigador antes de firmar</h3>
+      <h3>La hoja de ruta del investigador</h3>
       <ul class="chk">
         <li><svg class="ic"><use href="#i-tilde"/></svg> Verificación en comisaría</li>
-        <li><svg class="ic"><use href="#i-tilde"/></svg> Relevamiento del lugar del hecho</li>
-        <li><svg class="ic"><use href="#i-tilde"/></svg> Entrevista al asegurado</li>
-        <li><svg class="ic"><use href="#i-tilde"/></svg> Entrevista al conductor</li>
-        <li><svg class="ic"><use href="#i-tilde"/></svg> Inspección física del vehículo</li>
-        <li><svg class="ic"><use href="#i-tilde"/></svg> Antecedentes del vehículo</li>
-        <li><svg class="ic"><use href="#i-tilde"/></svg> Verificación de preexistencias</li>
-        <li><svg class="ic"><use href="#i-tilde"/></svg> Peritaje y estimación del daño</li>
+        <li><svg class="ic"><use href="#i-tilde"/></svg> Relevamiento del lugar</li>
+        <li><svg class="ic"><use href="#i-tilde"/></svg> Entrevistas al asegurado y al conductor</li>
+        <li><svg class="ic"><use href="#i-tilde"/></svg> Inspección del vehículo</li>
+        <li><svg class="ic"><use href="#i-tilde"/></svg> Antecedentes y preexistencias</li>
+        <li><svg class="ic"><use href="#i-tilde"/></svg> Peritaje del daño</li>
         <li><svg class="ic"><use href="#i-tilde"/></svg> Seguimiento de la causa penal</li>
-        <li><svg class="ic"><use href="#i-tilde"/></svg> Revisión de la estrategia si cambia una declaración</li>
       </ul>
     </div>
   </section>
@@ -774,24 +862,36 @@
   <!-- ========== 7 · GLOSARIO ========== -->
   <section class="pantalla" id="p7">
     <h2>Glosario del <em>expediente</em></h2>
-    <p class="bajada">Ocho palabras que aparecen en cualquier informe de siniestros. Tocá para ver la definición.</p>
+    <p class="bajada">Seis palabras del oficio. Tocá para ver.</p>
     <div class="rejilla">
-      <button class="voltea glos" onclick="girar(this)"><span class="cara frente"><span class="rot">Siniestro</span><span class="pista">tocá</span></span><span class="cara dorso">El hecho dañoso —choque, robo, incendio— que la póliza cubre. No es sinónimo de tragedia: es el término técnico del contrato.</span></button>
-      <button class="voltea glos" onclick="girar(this)"><span class="cara frente"><span class="rot">Asegurado</span><span class="pista">tocá</span></span><span class="cara dorso">La persona o empresa titular de la póliza. Acá es la empresa de transporte, no el chofer que manejaba.</span></button>
-      <button class="voltea glos" onclick="girar(this)"><span class="cara frente"><span class="rot">Liquidador</span><span class="pista">tocá</span></span><span class="cara dorso">El estudio independiente que la aseguradora contrata para investigar el siniestro e informar qué pasó realmente.</span></button>
-      <button class="voltea glos" onclick="girar(this)"><span class="cara frente"><span class="rot">Perito</span><span class="pista">tocá</span></span><span class="cara dorso">El especialista que mide técnicamente el daño y le pone un número: mecánico, médico, accidentológico.</span></button>
-      <button class="voltea glos" onclick="girar(this)"><span class="cara frente"><span class="rot">Hoja de ruta</span><span class="pista">tocá</span></span><span class="cara dorso">La lista de verificaciones obligatorias que el investigador va tildando caso por caso, para que nada quede librado a la memoria.</span></button>
-      <button class="voltea glos" onclick="girar(this)"><span class="cara frente"><span class="rot">Hecho armado</span><span class="pista">tocá</span></span><span class="cara dorso">Un siniestro montado a propósito para cobrar el seguro. Es la sospecha más grave que puede levantar un informe.</span></button>
-      <button class="voltea glos" onclick="girar(this)"><span class="cara frente"><span class="rot">Preexistencia</span><span class="pista">tocá</span></span><span class="cara dorso">Un daño que ya existía antes del hecho denunciado y que, por lo tanto, la póliza no debería pagar.</span></button>
-      <button class="voltea glos" onclick="girar(this)"><span class="cara frente"><span class="rot">Causa penal</span><span class="pista">tocá</span></span><span class="cara dorso">El expediente judicial que investiga si hubo delito y quién es responsable. Corre por separado del trámite del seguro.</span></button>
+      <button class="voltea glos" onclick="girar(this)"><span class="cara frente"><span class="rot">Siniestro</span><span class="pista">tocá</span></span><span class="cara dorso">El hecho dañoso que cubre la póliza: choque, robo, incendio.</span></button>
+      <button class="voltea glos" onclick="girar(this)"><span class="cara frente"><span class="rot">Asegurado</span><span class="pista">tocá</span></span><span class="cara dorso">El titular de la póliza. Acá es la empresa de transporte, no el chofer.</span></button>
+      <button class="voltea glos" onclick="girar(this)"><span class="cara frente"><span class="rot">Liquidador</span><span class="pista">tocá</span></span><span class="cara dorso">El estudio independiente que investiga el siniestro para la aseguradora.</span></button>
+      <button class="voltea glos" onclick="girar(this)"><span class="cara frente"><span class="rot">Perito</span><span class="pista">tocá</span></span><span class="cara dorso">El que mide el daño y le pone un número.</span></button>
+      <button class="voltea glos" onclick="girar(this)"><span class="cara frente"><span class="rot">Hecho armado</span><span class="pista">tocá</span></span><span class="cara dorso">Un siniestro montado a propósito para cobrar. La sospecha más grave.</span></button>
+      <button class="voltea glos" onclick="girar(this)"><span class="cara frente"><span class="rot">Causa penal</span><span class="pista">tocá</span></span><span class="cara dorso">El expediente judicial que busca responsables. Va por separado del seguro.</span></button>
     </div>
   </section>
 
-  <!-- ========== 8 · CIERRE ========== -->
+  <!-- ========== 8 · RONDA EXTRA ========== -->
   <section class="pantalla" id="p8">
+    <h2>Ronda extra: <em>ahora sí hay fraude</em></h2>
+    <div class="caso-b-intro">
+      <h3>Tres denuncias truchas</h3>
+      <p>En el caso de la Ruta 9 no había nada armado. Pero el fraude existe, y siempre deja una pieza que no encaja. Leé la denuncia y tocá <b>la prueba que la desmiente</b>.</p>
+    </div>
+    <div class="marcador">
+      <div class="marcador-barra"><div class="marcador-relleno" id="rellenoB"></div></div>
+      <span class="marcador-txt" id="contadorB">1 / 3</span>
+    </div>
+    <div id="slotB"></div>
+  </section>
+
+  <!-- ========== 9 · CIERRE ========== -->
+  <section class="pantalla" id="p9">
     <h2>Expediente <em>cerrado</em></h2>
     <div class="creditos">
-      <p class="bajada" style="margin:0 auto 4px;">Este juego está construido sobre un informe real de relevamiento de un siniestro vial ocurrido en la Ruta Nacional 9. Se cambiaron los nombres de las personas y de las empresas, y se omitieron los datos del estudio interviniente.</p>
+      <p class="bajada" style="margin:0 auto 4px;">Basado en un informe real de un siniestro en la Ruta Nacional 9. Los nombres fueron cambiados.</p>
       <div class="campo">Proyecto de Feria de Ciencias<br><strong>Ahumada &amp; Aliendro</strong><br>Equipo: Siniestros<br>ISCET — 2026</div>
       <button class="btn rojo pulso" onclick="reiniciar()"><svg class="ic"><use href="#i-repetir"/></svg> Investigar de nuevo</button>
     </div>
@@ -832,6 +932,111 @@ const CONFIG = {
   TOP: 10
 };
 
+/* ==================== SONIDO Y VIBRACIÓN ====================
+   Los sonidos se generan con Web Audio API: no hay archivos que
+   cargar, así que funciona aunque la conexión sea pésima. */
+let audioCtx = null, mudo = false;
+try{ mudo = localStorage.getItem('ruta9_mudo') === '1'; }catch(e){}
+
+function ctx(){
+  if(!audioCtx){
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if(!AC) return null;
+    audioCtx = new AC();
+  }
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+function tono(freq, dur, tipo, vol, desliz){
+  const c = ctx(); if(!c) return;
+  const osc = c.createOscillator(), g = c.createGain();
+  osc.type = tipo || 'sine';
+  osc.frequency.setValueAtTime(freq, c.currentTime);
+  if(desliz) osc.frequency.exponentialRampToValueAtTime(desliz, c.currentTime + dur);
+  g.gain.setValueAtTime(0.0001, c.currentTime);
+  g.gain.exponentialRampToValueAtTime(vol || .12, c.currentTime + .012);
+  g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + dur);
+  osc.connect(g); g.connect(c.destination);
+  osc.start(); osc.stop(c.currentTime + dur + .02);
+}
+
+function ruido(dur, vol){
+  const c = ctx(); if(!c) return;
+  const n = Math.floor(c.sampleRate * dur);
+  const buf = c.createBuffer(1, n, c.sampleRate);
+  const d = buf.getChannelData(0);
+  for(let i=0;i<n;i++) d[i] = (Math.random()*2-1) * Math.pow(1 - i/n, 2);
+  const src = c.createBufferSource(), g = c.createGain(), f = c.createBiquadFilter();
+  src.buffer = buf; f.type = 'lowpass'; f.frequency.value = 900;
+  g.gain.value = vol || .3;
+  src.connect(f); f.connect(g); g.connect(c.destination);
+  src.start();
+}
+
+function sonar(cual){
+  if(mudo) return;
+  try{
+    switch(cual){
+      case 'tap':    tono(520, .05, 'square', .04); break;
+      case 'bien':   tono(660, .09, 'triangle', .11); setTimeout(()=>tono(990, .16, 'triangle', .11), 85); break;
+      case 'mal':    tono(180, .26, 'sawtooth', .09, 90); break;
+      case 'racha':  [784,988,1319].forEach((f,i)=>setTimeout(()=>tono(f,.12,'triangle',.1), i*70)); break;
+      case 'choque': ruido(.55, .38); tono(70, .5, 'sawtooth', .16, 38); break;
+      case 'sello':  tono(140, .1, 'square', .14); setTimeout(()=>ruido(.2,.2), 60); break;
+      case 'final':  [523,659,784,1047].forEach((f,i)=>setTimeout(()=>tono(f,.22,'triangle',.11), i*95)); break;
+    }
+  }catch(e){}
+}
+
+function vibrar(patron){
+  if(mudo) return;
+  try{ if(navigator.vibrate) navigator.vibrate(patron); }catch(e){}
+}
+
+function alternarSonido(){
+  mudo = !mudo;
+  try{ localStorage.setItem('ruta9_mudo', mudo ? '1' : '0'); }catch(e){}
+  pintarBotonAudio();
+  if(!mudo) sonar('tap');
+}
+function pintarBotonAudio(){
+  const b = document.getElementById('btnAudio');
+  b.classList.toggle('mudo', mudo);
+  b.querySelector('use').setAttribute('href', mudo ? '#i-mudo' : '#i-sonido');
+}
+
+/* un toque en cualquier botón suena y desbloquea el audio del navegador */
+document.addEventListener('pointerdown', e=>{
+  if(e.target.closest('button')) sonar('tap');
+}, {passive:true});
+
+/* ==================== RACHA ==================== */
+let racha = 0;
+function mostrarRacha(n){
+  const el = document.getElementById('racha');
+  el.innerHTML = '<svg class="ic" style="width:16px;height:16px;vertical-align:-2px"><use href="#i-fuego"/></svg> Racha x'+n;
+  el.classList.remove('on'); void el.offsetWidth; el.classList.add('on');
+  sonar('racha'); vibrar([25,40,25,40,60]);
+}
+
+/* ==================== COMPARTIR ==================== */
+function compartir(){
+  if(!resultado) return;
+  const txt = 'Resolví el Expediente Ruta 9 con '+resultado.total+' puntos ('+
+              resultado.aciertos+'/6 en '+mmss(resultado.seg)+') y quedé como '+
+              resultado.rango+'. ¿Podés superarme?';
+  const datos = {title:'Expediente Ruta 9', text:txt, url:location.href};
+  const aviso = document.getElementById('copiado');
+  if(navigator.share){
+    navigator.share(datos).catch(()=>{});
+  } else if(navigator.clipboard){
+    navigator.clipboard.writeText(txt+' '+location.href)
+      .then(()=>{ aviso.textContent = 'Copiado al portapapeles'; setTimeout(()=>aviso.textContent='', 2600); })
+      .catch(()=>{ aviso.textContent = 'No se pudo copiar'; });
+  }
+}
+
 /* ==================== cronómetro ==================== */
 let tInicio = null, tFin = null, relojInt = null;
 let alias = '';
@@ -862,7 +1067,7 @@ function pararCrono(){
 }
 
 /* ==================== navegación ==================== */
-const etapas = ["Portada","El caso","Reconstrucción","La escena","Sospechas","Veredicto","Después","Glosario","Cierre"];
+const etapas = ["Portada","El caso","Reconstrucción","La escena","Sospechas","Veredicto","Después","Glosario","Ronda extra","Cierre"];
 const kmBase = 848;
 const pantallas = etapas.map((_,i)=>document.getElementById('p'+i));
 let actual = 0;
@@ -908,6 +1113,14 @@ function ir(n, forzar){
   }
   if(actual===4 && !juegoIniciado) iniciarJuego();
   if(actual===5) animarPuntaje();
+  if(actual===8 && !casoBIniciado) iniciarCasoB();
+
+  /* en los cuestionarios se esconde la navegación: solo se sale respondiendo */
+  const enQuiz = (actual===4 && !juegoTerminado) || (actual===8 && !casoBTerminado);
+  document.querySelector('footer.nav').classList.toggle('oculta', enQuiz);
+  document.getElementById('app').classList.toggle('sin-nav', enQuiz);
+  document.getElementById('ticks').classList.toggle('bloqueado', enQuiz);
+
   window.scrollTo({top:0,behavior:'auto'});
 }
 function posicionarCamion(){
@@ -959,6 +1172,7 @@ function reproducir(){
   /* doble frame: reinicia las animaciones CSS de forma confiable en SVG */
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
     sim.classList.add('corre');
+    temporizadores.push(setTimeout(()=>{ sonar('choque'); vibrar([90,40,160]); }, 2700));
     beats.forEach(b=>{
       temporizadores.push(setTimeout(()=>{
         beats.forEach(x=>x.classList.remove('on'));
@@ -972,64 +1186,64 @@ function reproducir(){
 /* ==================== juego ==================== */
 const sospechas = [
   {
-    t:"Hecho armado", def:"Un choque montado a propósito para cobrar el seguro.",
-    q:"¿Con qué prueba se descarta que todo haya sido un montaje?",
+    t:"Hecho armado", def:"Un choque montado a propósito.",
+    q:"¿Qué descarta que sea un montaje?",
     ops:[
-      "El camión transportaba carga peligrosa con las placas reglamentarias de identificación de riesgo colocadas, tal como exige la normativa vigente para el traslado de combustible en rutas nacionales.",
-      "Cuando llegó la policía ya había otros automovilistas detenidos sobre la banquina que habían presenciado la secuencia completa, y esa misma mañana intervinieron una ambulancia y personal policial que actuó en el lugar.",
-      "El conductor es chofer de empresa desde hace años y venía cumpliendo un recorrido habitual, con una parada previa documentada para cargar combustible y rendir el viaje del día anterior."
+      "El camión llevaba las placas de peligro reglamentarias.",
+      "Había autos detenidos que vieron el choque, y llegaron policía y ambulancia ese mismo día.",
+      "El chofer venía haciendo un recorrido de trabajo habitual."
     ], ok:1,
-    exp:"Un hecho armado necesita ocurrir sin testigos y sin intervención oficial inmediata. Que el camión estuviera bien señalizado o que el viaje fuera rutinario son datos ciertos, pero describen la normalidad previa: no prueban que el choque haya ocurrido de verdad. Los testigos y los organismos que actuaron en el momento, sí."
+    exp:"Un montaje necesita ocurrir sin testigos. Que el camión estuviera en regla o que el viaje fuera rutinario no prueba que el choque pasó."
   },
   {
-    t:"Préstamo de póliza", def:"Que maneje alguien distinto del que después se declara.",
-    q:"¿Qué elemento descarta que haya manejado otra persona?",
+    t:"Préstamo de póliza", def:"Que maneje alguien distinto del que se declara.",
+    q:"¿Qué descarta que haya manejado otro?",
     ops:[
-      "El conductor entrevistado por el investigador es la misma persona que fue asistida en el hospital esa mañana y la misma que figura como conductor del evento, y cuenta con la habilitación para esa categoría de vehículo.",
-      "La póliza de la unidad se encontraba vigente al momento del siniestro, contratada con anterioridad al hecho y sin suspensiones de cobertura registradas por la aseguradora.",
-      "El camión estaba realizando un viaje de trabajo con la carga completa hacia otra provincia, lo que confirma que se lo usaba dentro de la actividad declarada por la empresa asegurada."
+      "El que declaró, el que fue al hospital y el habilitado son la misma persona.",
+      "La póliza estaba vigente y sin deudas.",
+      "El camión iba cargado, en viaje de trabajo."
     ], ok:0,
-    exp:"Que la póliza esté al día y que el viaje fuera laboral son ciertos, pero hablan del contrato y del uso del camión, no de quién iba al volante. Lo que cierra la sospecha es la cadena de identidad: el que dice haber manejado, el que fue atendido en el hospital y el que está habilitado tienen que ser la misma persona."
+    exp:"La póliza y el viaje hablan del contrato y del uso del camión, no de quién iba al volante."
   },
   {
-    t:"Documentación apócrifa", def:"Papeles falsos o vencidos presentados como válidos.",
-    q:"¿Qué verificación descarta que la documentación sea falsa?",
+    t:"Documentación apócrifa", def:"Papeles falsos o vencidos.",
+    q:"¿Qué descarta que los papeles sean truchos?",
     ops:[
-      "El informe de relevamiento incluye un álbum fotográfico extenso del lugar del hecho, de los dos vehículos y de cada uno de los daños, tomado por personal del estudio durante la inspección presencial.",
-      "El conductor firmó un formulario de declaración jurada ante el personal del estudio, donde asentó su versión del hecho y sus datos personales bajo responsabilidad legal.",
-      "Los certificados del tractor y del semirremolque se controlaron por separado ante los organismos que los emiten, verificando número, vigencia y categoría, y los datos coincidían con los registros oficiales."
+      "El informe tiene muchas fotos del lugar y de los daños.",
+      "El chofer firmó una declaración jurada.",
+      "Se chequearon los certificados del camión y del acoplado en los organismos que los emiten."
     ], ok:2,
-    exp:"Un álbum de fotos prueba los daños, no los papeles. Y una declaración jurada la firma también quien miente. Un documento solo se valida contra la base del organismo que lo emitió, y en transporte de carga eso significa chequear por separado el tractor y el acoplado, que tienen habilitaciones distintas."
+    exp:"Las fotos prueban daños, no papeles. Y una declaración jurada la firma también el que miente."
   },
   {
-    t:"Cambio de circunstancias", def:"Modificar quién manejaba, cuándo o cómo pasó el hecho.",
-    q:"¿Qué prueba que la historia no fue cambiada sobre la marcha?",
+    t:"Cambio de circunstancias", def:"Cambiar quién manejaba, cuándo o cómo pasó.",
+    q:"¿Qué prueba que no cambiaron la historia?",
     ops:[
-      "El conductor informó por propia iniciativa que había tenido un accidente vial anterior, en 1996, manejando para otra empresa de transporte, sin que el investigador se lo preguntara.",
-      "La versión se mantuvo sin variaciones entre la denuncia inicial y la entrevista presencial posterior, y cada detalle —el sentido de circulación, el sector del impacto y la salida a la banquina— coincide con las huellas y la posición final de los vehículos.",
-      "Se pudo reconstruir con precisión el itinerario previo del camión: la noche anterior en una terminal, la carga a la mañana siguiente y una parada intermedia para cargar combustible."
+      "Contó sin que le preguntaran un accidente propio de 1996.",
+      "La versión no cambió entre entrevistas y coincide con las huellas y la posición final.",
+      "Se reconstruyó todo el itinerario previo del camión."
     ], ok:1,
-    exp:"Contar un accidente viejo sin que se lo pregunten genera buena impresión, y un itinerario detallado suena sólido, pero ninguna de las dos cosas impide que el relato del choque haya cambiado. Lo único que lo impide es que la versión se mantenga igual entre entrevistas y que además choque contra la evidencia física del terreno."
+    exp:"Caer bien o tener un itinerario prolijo no impide cambiar el relato. Que el relato choque contra la evidencia física, sí."
   },
   {
-    t:"Magnificación de daños", def:"Inflar el daño real para cobrar de más.",
-    q:"¿Qué descarta que los daños estén exagerados?",
+    t:"Magnificación de daños", def:"Inflar el daño para cobrar de más.",
+    q:"¿Qué descarta que el daño esté inflado?",
     ops:[
-      "Cada daño tiene un mecanismo que lo explica dentro del relato: el sector delantero derecho corresponde a la colisión con el automóvil y las deformaciones del lateral derecho de la cisterna al vuelco posterior, todo medido por los peritos sobre el vehículo.",
-      "De los 35.935 litros de gasoil que transportaba la cisterna solo se perdieron 4.935, lo que demuestra que el tanque resistió el vuelco sin sufrir una rotura generalizada de su estructura.",
-      "El camión fue trasladado a un taller cerrado donde quedó a disposición del estudio, lo que permitió inspeccionarlo con luz adecuada y fotografiarlo desde todos sus ángulos."
+      "Cada golpe tiene su causa: el frente derecho por el choque, el lateral por el vuelco.",
+      "De 35.935 litros de gasoil solo se perdieron 4.935.",
+      "El camión se peritó en un taller cerrado, con buena luz."
     ], ok:0,
-    exp:"Que se haya derramado poco combustible o que el peritaje se haya hecho cómodo son datos reales, pero no dicen nada sobre si el daño fue inflado. La clave no es cuánto daño hay, sino si cada golpe tiene una causa dentro del relato. Un daño suelto, sin mecanismo que lo explique, es la señal típica de magnificación."
+    exp:"No importa cuánto daño hay, sino si cada golpe tiene un mecanismo que lo explique. Un daño suelto es la señal típica."
   },
   {
-    t:"Preexistencia de daños", def:"Daños viejos presentados como parte de este choque.",
-    q:"¿Qué permite descartar que esos daños ya existieran?",
+    t:"Preexistencia", def:"Daños viejos presentados como nuevos.",
+    q:"¿Qué descarta que esos daños ya estuvieran?",
     ops:[
-      "El airbag del conductor se activó durante el impacto y el parabrisas quedó estallado, señales compatibles con una colisión de energía considerable ocurrida en ese momento.",
-      "La unidad contaba con su certificación técnica aprobada y con vencimiento posterior a la fecha del siniestro, un control que incluye la verificación del estado general del vehículo.",
-      "La inspección física se cruzó con la verificación de los antecedentes de la unidad y del estado anterior del riesgo, comparando su historial con lo observado, sin hallar daños previos al hecho denunciado."
+      "Se activó el airbag y estalló el parabrisas.",
+      "La unidad tenía su certificación técnica al día.",
+      "Se comparó el historial de la unidad con lo inspeccionado: sin daños previos."
     ], ok:2,
-    exp:"El airbag prueba que hubo un impacto fuerte ese día, pero no que todos los daños sean de ese impacto. Y una certificación vigente controla condiciones de seguridad, no el estado estético ni estructural completo. Descartar preexistencias exige revisar el historial del riesgo y compararlo con lo que se ve hoy."
+    exp:"El airbag prueba que hubo un impacto fuerte, no que todos los daños sean de ese impacto."
   }
 ];
 
@@ -1090,7 +1304,7 @@ function chispas(cont){
 
 function elegir(btn){
   const acerto = btn.dataset.ok === 'true';
-  if(acerto) puntos++;
+  if(acerto){ puntos++; racha++; } else { racha = 0; }
   respondidas++;
   document.querySelectorAll('.op').forEach(b=>{
     b.disabled = true;
@@ -1100,7 +1314,13 @@ function elegir(btn){
 
   const tarjeta = document.getElementById('tarjeta');
   tarjeta.classList.add(acerto ? 'acertada' : 'fallada');
-  if(acerto && !sinMovimiento) chispas(tarjeta);
+  if(acerto){
+    sonar('bien'); vibrar(40);
+    if(!sinMovimiento) chispas(tarjeta);
+    if(racha >= 3) setTimeout(()=>mostrarRacha(racha), 260);
+  } else {
+    sonar('mal'); vibrar([70,50,70]);
+  }
 
   const d = sospechas[orden[idx]];
   const caja = document.getElementById('fallo');
@@ -1153,6 +1373,9 @@ function finalizarJuego(){
   document.getElementById('dBonus').textContent = '+'+bonus;
   ir(5, true);
   cerrarPartida();
+  racha = 0;
+  setTimeout(()=>{ sonar('sello'); vibrar([50,60,120]); }, 250);
+  setTimeout(()=>sonar('final'), 700);
 }
 
 function idPartida(){
@@ -1170,6 +1393,121 @@ function animarPuntaje(){
     el.textContent = n;
     if(i>=pasos){ el.textContent = meta; clearInterval(t); }
   }, 32);
+}
+
+/* ==================== RONDA EXTRA: encontrá el fraude ====================
+   Casos didácticos (no son el expediente real): cada denuncia trae una
+   prueba que la desmiente. */
+const casosB = [
+  {
+    denuncia:"El lunes a las 22:00 choqué contra un poste en la ruta. Quiero que el seguro cubra el frente del auto.",
+    pruebas:[
+      "El parte policial se labró el martes a la mañana.",
+      "La póliza fue contratada el lunes a las 23:40.",
+      "El taller presupuestó los daños tres días después.",
+      "No hubo heridos ni terceros involucrados."
+    ], culpable:1,
+    exp:"Contrató el seguro casi dos horas DESPUÉS del horario que él mismo denunció. Nadie asegura un auto que ya está roto… salvo que quiera que se lo paguen."
+  },
+  {
+    denuncia:"Me chocaron de atrás mientras estaba detenido en el semáforo. El golpe me dañó todo el auto.",
+    pruebas:[
+      "El otro conductor admite su responsabilidad.",
+      "El semáforo de esa esquina funcionaba con normalidad.",
+      "El auto tiene daños en el frente, los dos laterales y el techo.",
+      "El accidente ocurrió a plena luz del día."
+    ], culpable:2,
+    exp:"Un golpe por atrás deja daños atrás. Los del frente, los laterales y el techo no tienen ningún mecanismo que los explique dentro de ese relato: son daños viejos que quiso colar."
+  },
+  {
+    denuncia:"Mi camioneta se incendió sola por una falla eléctrica mientras estaba estacionada de noche.",
+    pruebas:[
+      "Los bomberos hallaron restos de combustible fuera del tanque.",
+      "La camioneta tenía ocho años de antigüedad.",
+      "Estaba estacionada en un descampado sin cámaras.",
+      "El titular denunció el hecho a la mañana siguiente."
+    ], culpable:0,
+    exp:"Una falla eléctrica no reparte combustible por fuera del tanque. Ese rastro es la firma de un incendio provocado: alguien lo ayudó a arder."
+  }
+];
+
+let idxB = 0, aciertosB = 0, casoBIniciado = false, casoBTerminado = false;
+
+function iniciarCasoB(){
+  casoBIniciado = true; casoBTerminado = false;
+  idxB = 0; aciertosB = 0;
+  pintarCasoB();
+}
+
+function pintarCasoB(){
+  const c = casosB[idxB];
+  document.getElementById('contadorB').textContent = (idxB+1)+' / '+casosB.length;
+  document.getElementById('rellenoB').style.width = Math.round((idxB/casosB.length)*100)+'%';
+  document.getElementById('slotB').innerHTML =
+    '<div class="denuncia"><b>Denuncia del asegurado</b><p>“'+c.denuncia+'”</p></div>'+
+    '<div class="pruebas" id="pruebasB">'+
+      c.pruebas.map((p,i)=>'<button class="prueba" data-i="'+i+'" onclick="acusar(this)">'+
+        '<span class="num">'+(i+1)+'</span><span>'+p+'</span></button>').join('')+
+    '</div>'+
+    '<div class="fallo" id="falloB"></div>';
+}
+
+function acusar(btn){
+  const c = casosB[idxB];
+  const elegido = +btn.dataset.i;
+  const acerto = elegido === c.culpable;
+  if(acerto) aciertosB++;
+
+  document.querySelectorAll('.prueba').forEach(b=>{
+    b.disabled = true;
+    const i = +b.dataset.i;
+    if(i === c.culpable) b.classList.add('culpable');
+    else if(i === elegido) b.classList.add('errada');
+  });
+
+  if(acerto){ sonar('bien'); vibrar(40); } else { sonar('mal'); vibrar([70,50,70]); }
+
+  const caja = document.getElementById('falloB');
+  caja.className = 'fallo vista '+(acerto?'acierto':'error');
+  caja.innerHTML =
+    '<b>'+(acerto ? '¡La encontraste!' : 'La que no cierra era otra')+'</b>'+ c.exp +
+    '<div class="accion"><button class="btn" onclick="siguienteCasoB()">'+
+    (idxB === casosB.length-1 ? 'Terminar' : 'Siguiente denuncia')+
+    ' <svg class="ic"><use href="#i-flecha"/></svg></button></div>';
+  caja.scrollIntoView({block:'nearest', behavior:'smooth'});
+}
+
+function siguienteCasoB(){
+  if(idxB < casosB.length-1){ idxB++; pintarCasoB(); return; }
+  casoBTerminado = true;
+  document.getElementById('rellenoB').style.width = '100%';
+  const extra = aciertosB*100;
+  if(resultado){
+    resultado.total += extra;
+    resultado.casoB = aciertosB;
+    actualizarLocal(resultado);
+  }
+  sonar(aciertosB===3 ? 'final' : 'sello');
+  vibrar([50,60,120]);
+  document.getElementById('slotB').innerHTML =
+    '<div style="text-align:center;padding:10px 0">'+
+      '<div class="sello-fraude">'+(aciertosB===3?'Fraude detectado':'Caso cerrado')+'</div>'+
+      '<div class="puntaje">Encontraste <span>'+aciertosB+'</span> de 3</div>'+
+      (extra ? '<div class="rango">+'+extra+' puntos al ranking</div>' : '')+
+      '<p class="msj">En el expediente real nada de esto apareció. Por eso se calificó como hecho real: el fraude siempre deja una pieza que no encaja.</p>'+
+    '</div>';
+  document.querySelector('footer.nav').classList.remove('oculta');
+  document.getElementById('app').classList.remove('sin-nav');
+  document.getElementById('ticks').classList.remove('bloqueado');
+}
+
+function actualizarLocal(reg){
+  try{
+    const l = leerLocal();
+    const i = l.findIndex(x=>x.id === reg.id);
+    if(i >= 0) l[i] = reg; else l.push(reg);
+    localStorage.setItem(CLAVE_LOCAL, JSON.stringify(l.slice(-300)));
+  }catch(e){}
 }
 
 /* ==================== ranking ==================== */
@@ -1235,6 +1573,10 @@ function reiniciar(){
   beats.forEach(b=>b.classList.remove('on'));
   document.getElementById('btnPlayTxt').textContent = 'Reproducir el choque';
   juegoIniciado = false; juegoTerminado = false; respondidas = 0;
+  casoBIniciado = false; casoBTerminado = false; idxB = 0; aciertosB = 0; racha = 0;
+  document.getElementById('slotB').innerHTML = '';
+  document.getElementById('rellenoB').style.width = '0%';
+  document.getElementById('copiado').textContent = '';
   cerrarModal();
   clearInterval(relojInt); relojInt = null;
   tInicio = null; tFin = null; resultado = null;
@@ -1247,6 +1589,7 @@ function reiniciar(){
   ir(0);
 }
 
+pintarBotonAudio();
 ir(0);
 </script>
 </body>
